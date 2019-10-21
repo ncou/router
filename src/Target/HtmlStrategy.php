@@ -7,7 +7,7 @@ declare(strict_types=1);
 namespace Chiron\Router\Target;
 
 use Chiron\Container\InvokerInterface;
-use Chiron\Routing\Route;
+use Chiron\Router\Route;
 use LogicException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

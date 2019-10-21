@@ -7,7 +7,7 @@ namespace Chiron\Router;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Chiron\Http\Middleware\RoutingMiddleware;
+use Chiron\Router\Middleware\RoutingMiddleware;
 
 // TODO : renommer en RouteHandler
 class RouteRunner implements RequestHandlerInterface

@@ -6,7 +6,7 @@ namespace Chiron\Router\Target;
 
 //use Chiron\Http\Psr\Response;
 use Chiron\Container\InvokerInterface;
-use Chiron\Routing\Route;
+use Chiron\Router\Route;
 use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

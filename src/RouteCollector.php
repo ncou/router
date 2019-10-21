@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Chiron\Router;
 
-use Chiron\Routing\Traits\MiddlewareAwareInterface;
-use Chiron\Routing\Traits\MiddlewareAwareTrait;
-use Chiron\Routing\Traits\RouteConditionHandlerInterface;
-use Chiron\Routing\Traits\RouteCollectionTrait;
-use Chiron\Routing\Traits\StrategyAwareInterface;
-use Chiron\Routing\Traits\StrategyAwareTrait;
+use Chiron\Router\Traits\MiddlewareAwareInterface;
+use Chiron\Router\Traits\MiddlewareAwareTrait;
+use Chiron\Router\Traits\RouteConditionHandlerInterface;
+use Chiron\Router\Traits\RouteCollectionTrait;
+use Chiron\Router\Traits\StrategyAwareInterface;
+use Chiron\Router\Traits\StrategyAwareTrait;
 use Psr\Http\Server\RequestHandlerInterface;
 use InvalidArgumentException;
 use ArrayIterator;
@@ -21,12 +21,12 @@ class RouteCollector implements RouteCollectorInterface
     use RouteCollectionTrait;
 
     /**
-     * @var \Chiron\Routing\Route[]
+     * @var \Chiron\Router\Route[]
      */
     private $routes = [];
 
     /**
-     * @var \Chiron\Routing\RouteGroup[]
+     * @var \Chiron\Router\RouteGroup[]
      */
     private $groups = [];
 
@@ -52,7 +52,7 @@ class RouteCollector implements RouteCollectorInterface
      * @param string   $prefix
      * @param callable $group
      *
-     * @return \Chiron\Routing\RouteGroup
+     * @return \Chiron\Router\RouteGroup
      */
     // TODO : vérifier si on pas plutot utiliser un Closure au lieu d'un callable pour le typehint.
     // TODO : il semble pôssible dans Slim de passer une string, ou un callable. Vérifier l'utilité de cette possibilité d'avoir un string !!!!
@@ -109,7 +109,7 @@ class RouteCollector implements RouteCollectorInterface
      *
      * @throws \InvalidArgumentException If named route does not exist
      *
-     * @return \Chiron\Routing\Route
+     * @return \Chiron\Router\Route
      */
     public function getNamedRoute(string $name): Route
     {

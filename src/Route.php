@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Chiron\Router;
 
-use Chiron\Routing\Traits\MiddlewareAwareInterface;
-use Chiron\Routing\Traits\MiddlewareAwareTrait;
-use Chiron\Routing\Traits\RouteConditionHandlerInterface;
-use Chiron\Routing\Traits\RouteConditionHandlerTrait;
+use Chiron\Router\Traits\MiddlewareAwareInterface;
+use Chiron\Router\Traits\MiddlewareAwareTrait;
+use Chiron\Router\Traits\RouteConditionHandlerInterface;
+use Chiron\Router\Traits\RouteConditionHandlerTrait;
 use Psr\Http\Server\RequestHandlerInterface;
 use InvalidArgumentException;
 

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Chiron\Router\Traits;
 
-use Chiron\Routing\Route;
-use Chiron\Routing\RouteGroup;
+use Chiron\Router\Route;
+use Chiron\Router\RouteGroup;
 use Psr\Http\Server\RequestHandlerInterface;
 
 // TODO : on devrait pas aussi ajouter les méthodes map et group dans cette interface ?????
@@ -18,7 +18,7 @@ interface RouteCollectionInterface
      * @param string   $prefix
      * @param callable $group
      *
-     * @return \Chiron\Routing\RouteGroup
+     * @return \Chiron\Router\RouteGroup
      */
     public function group(string $prefix, callable $group): RouteGroup;
 
@@ -28,7 +28,7 @@ interface RouteCollectionInterface
      * @param string          $path
      * @param RequestHandlerInterface $handler
      *
-     * @return \Chiron\Routing\Route
+     * @return \Chiron\Router\Route
      */
     public function map(string $path, RequestHandlerInterface $handler): Route;
 
@@ -41,7 +41,7 @@ interface RouteCollectionInterface
      * @param string          $pattern The route URI pattern
      * @param RequestHandlerInterface $handler The route callback routine
      *
-     * @return \Chiron\Routing\Route
+     * @return \Chiron\Router\Route
      */
     public function get(string $pattern, RequestHandlerInterface $handler): Route;
 
@@ -56,7 +56,7 @@ interface RouteCollectionInterface
      * @param string          $pattern The route URI pattern
      * @param RequestHandlerInterface $handler The route callback routine
      *
-     * @return \Chiron\Routing\Route
+     * @return \Chiron\Router\Route
      */
     public function head(string $pattern, RequestHandlerInterface $handler): Route;
 
@@ -69,7 +69,7 @@ interface RouteCollectionInterface
      * @param string          $pattern The route URI pattern
      * @param RequestHandlerInterface $handler The route callback routine
      *
-     * @return \Chiron\Routing\Route
+     * @return \Chiron\Router\Route
      */
     public function post(string $pattern, RequestHandlerInterface $handler): Route;
 
@@ -82,7 +82,7 @@ interface RouteCollectionInterface
      * @param string          $pattern The route URI pattern
      * @param RequestHandlerInterface $handler The route callback routine
      *
-     * @return \Chiron\Routing\Route
+     * @return \Chiron\Router\Route
      */
     public function put(string $pattern, RequestHandlerInterface $handler): Route;
 
@@ -95,7 +95,7 @@ interface RouteCollectionInterface
      * @param string          $pattern The route URI pattern
      * @param RequestHandlerInterface $handler The route callback routine
      *
-     * @return \Chiron\Routing\Route
+     * @return \Chiron\Router\Route
      */
     public function delete(string $pattern, RequestHandlerInterface $handler): Route;
 
@@ -108,7 +108,7 @@ interface RouteCollectionInterface
      * @param string          $pattern The route URI pattern
      * @param RequestHandlerInterface $handler The route callback routine
      *
-     * @return \Chiron\Routing\Route
+     * @return \Chiron\Router\Route
      */
     public function options(string $pattern, RequestHandlerInterface $handler): Route;
 
@@ -121,7 +121,7 @@ interface RouteCollectionInterface
      * @param string          $pattern The route URI pattern
      * @param RequestHandlerInterface $handler The route callback routine
      *
-     * @return \Chiron\Routing\Route
+     * @return \Chiron\Router\Route
      */
     public function trace(string $pattern, RequestHandlerInterface $handler): Route;
 
@@ -135,7 +135,7 @@ interface RouteCollectionInterface
      * @param string          $pattern The route URI pattern
      * @param RequestHandlerInterface $handler The route callback routine
      *
-     * @return \Chiron\Routing\Route
+     * @return \Chiron\Router\Route
      */
     public function patch(string $pattern, RequestHandlerInterface $handler): Route;
 
@@ -146,7 +146,7 @@ interface RouteCollectionInterface
      * @param string          $pattern The route URI pattern
      * @param RequestHandlerInterface $handler The route callback routine
      *
-     * @return \Chiron\Routing\Route
+     * @return \Chiron\Router\Route
      */
     public function any(string $pattern, RequestHandlerInterface $handler): Route;
 
@@ -157,7 +157,7 @@ interface RouteCollectionInterface
      * @param string $destination
      * @param int    $status
      *
-     * @return \Chiron\Routing\Route
+     * @return \Chiron\Router\Route
      */
     public function redirect(string $url, string $destination, int $status = 302): Route;
 
@@ -167,7 +167,7 @@ interface RouteCollectionInterface
      * @param string $url
      * @param string $destination
      *
-     * @return \Chiron\Routing\Route
+     * @return \Chiron\Router\Route
      */
     public function permanentRedirect(string $url, string $destination): Route;
 
@@ -178,7 +178,7 @@ interface RouteCollectionInterface
      * @param string $view
      * @param array  $params
      *
-     * @return \Chiron\Routing\Route
+     * @return \Chiron\Router\Route
      */
     public function view(string $url, string $view, array $params = []): Route;
 }
