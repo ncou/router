@@ -14,14 +14,17 @@
     "homepage": "https://github.com/ncou/",
     "license": "MIT",
     "require": {
-        "php": "^7.1"
+        "php": "^7.1",
+        "psr/http-server-middleware": "^1.0",
+        "chiron/http-exceptions": "^2.0"
     },
     "require-dev": {
         "phpstan/phpstan": "^0.11",
         "phpstan/phpstan-phpunit": "^0.11",
         "phpstan/phpstan-strict-rules": "^0.11",
         "phpunit/phpunit": "^7.3",
-        "chiron/coding-standard": "^2.1"
+        "chiron/coding-standard": "^2.1",
+        "nyholm/psr7": "^1.1"
     },
     "autoload": {
         "psr-4": {
@@ -30,7 +33,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Chiron\\Router\\": "tests"
+            "Chiron\\Tests\\Router\\": "tests"
         }
     },
     "scripts": {
