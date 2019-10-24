@@ -19,7 +19,7 @@ use Chiron\Container\ReflectionResolver;
  * and constructor based on types specified.
  *
  * ```php
- * Route::anyMethod('/test/{action:\w+}')->to(new WebActionsCaller(TestController::class, $container)),
+ * new Namespaced("App\Controllers");
  * ```
  */
 final class Namespaced implements RequestHandlerInterface

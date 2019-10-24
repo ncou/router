@@ -19,7 +19,7 @@ use Chiron\Container\ReflectionResolver;
  * and constructor based on types specified.
  *
  * ```php
- * Route::anyMethod('/test/{action:\w+}')->to(new WebActionsCaller(TestController::class, $container)),
+ * new Controller(HomeController::class);
  * ```
  */
 final class Controller implements RequestHandlerInterface
@@ -42,6 +42,7 @@ final class Controller implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $controller = $this->container->get($this->controller);
+
         $action = $request->getAttribute('action');
         if ($action === null) {
             throw new \RuntimeException('Request does not contain action attribute.');
