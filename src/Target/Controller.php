@@ -12,7 +12,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Chiron\Container\ReflectionResolver;
 
 /**
- * Namespaced maps a route like /post/{action} to methods of
+ * Controller maps a route like /post/{action} to methods of
  * a class instance specified named as "action" parameter.
  *
  * Dependencies are automatically injected into both method
@@ -22,43 +22,26 @@ use Chiron\Container\ReflectionResolver;
  * Route::anyMethod('/test/{action:\w+}')->to(new WebActionsCaller(TestController::class, $container)),
  * ```
  */
-final class Namespaced implements RequestHandlerInterface
+final class Controller implements RequestHandlerInterface
 {
     /** @var ContainerInterface */
     private $container;
     /** @var string */
-    private $namespace;
-    /** @var string */
-    private $postfix;
+    private $controller;
 
     /**
      * @param ContainerInterface $container
-     * @param string $namespace
-     * @param string $postfix
+     * @param string $controller
      */
-    public function __construct(ContainerInterface $container, string $namespace, string $postfix = 'Controller')
+    public function __construct(ContainerInterface $container, string $controller)
     {
         $this->container = $container;
-        $this->namespace = rtrim($namespace, '\\');
-        $this->postfix = ucfirst($postfix);
+        $this->controller = $controller;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $controllerName = $request->getAttribute('controller');
-
-        if ($controllerName === null) {
-            throw new \RuntimeException('Request does not contain controller attribute.');
-        }
-
-        $class = sprintf(
-            '%s\\%s%s',
-            $this->namespace,
-            $this->classify($controllerName),
-            $this->postfix
-        );
-
-        $controller = $this->container->get($class);
+        $controller = $this->container->get($this->controller);
         $action = $request->getAttribute('action');
         if ($action === null) {
             throw new \RuntimeException('Request does not contain action attribute.');
@@ -71,14 +54,5 @@ final class Namespaced implements RequestHandlerInterface
         }
 
         return (new ReflectionResolver($this->container))->call([$controller, $action], [$request]);
-    }
-
-
-    /**
-     * Converts a word into the format for a Doctrine class name. Converts 'table_name' to 'TableName'.
-     */
-    private function classify(string $word) : string
-    {
-        return str_replace([' ', '_', '-'], '', ucwords($word, ' _-'));
     }
 }

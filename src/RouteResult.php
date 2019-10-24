@@ -174,7 +174,7 @@ class RouteResult implements RequestHandlerInterface
      * Retrieve all the middlewares, if possible.
      *
      * If this result represents a failure, return false; otherwise, return the
-     * middleware of the Route + middleware of the RouteGroup.
+     * middleware stack of the Route.
      *
      * @return false|array
      */

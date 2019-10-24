@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Chiron\Router\Target;
@@ -28,20 +29,21 @@ use Chiron\Container\ReflectionResolver;
  */
 final class Callback implements RequestHandlerInterface
 {
+    private $container;
     /**
-     * @var callable a PHP callback matching signature of [[MiddlewareInterface::process()]].
+     * @var callable a PHP callback matching signature of [RequestHandlerInterface->handle(ServerRequestInterface $request)]].
      */
     private $callback;
-    private $container;
 
     public function __construct(ContainerInterface $container, callable $callback)
     {
-        $this->callback = $callback;
         $this->container = $container;
+        $this->callback = $callback;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        // TODO : il faut surement stocker la $request dans un tableau avec la clé = au nom de la classe pour permettre au Invoker de matcher la request avec via un Autowire avec ce paramétre du tableau
         return (new ReflectionResolver($this->container))->call($this->callback, [$request]);
     }
 }

@@ -26,10 +26,6 @@ interface RouterInterface extends MiddlewareAwareInterface, RequestHandlerInterf
      */
     public function getBasePath(): string;
 
-    public function getRouteCollector(): RouteCollectorInterface;
-
-    public function setRouteCollector(RouteCollectorInterface $collector): void;
-
     public function urlFor(string $routeName, array $substitutions = [], array $queryParams = []): string;
 
     public function relativeUrlFor(string $routeName, array $substitutions = [], array $queryParams = []): string;

@@ -68,6 +68,15 @@ trait MiddlewareAwareTrait
     /**
      * {@inheritdoc}
      */
+    // TODO : créer une méthode setMiddlewareStack(array $middlewares) pour pouvoir remplacer le tableau de middleware ??? non ???
+    public function getMiddlewareStack(): array
+    {
+        return $this->middlewares;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     /*
     public function middlewares(array $middlewares): MiddlewareAwareInterface
     {
@@ -97,15 +106,6 @@ trait MiddlewareAwareTrait
     {
         return array_shift($this->middleware);
     }*/
-
-    /**
-     * {@inheritdoc}
-     */
-    // TODO : créer une méthode setMiddlewareStack(array $middlewares) pour pouvoir remplacer le tableau de middleware ??? non ???
-    public function getMiddlewareStack(): array
-    {
-        return $this->middlewares;
-    }
 
     /*
      * Add middleware to the beginning of the stack

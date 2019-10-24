@@ -13,10 +13,25 @@ use InvalidArgumentException;
 
 //https://github.com/symfony/routing/blob/master/Route.php
 
-class Route implements RouteConditionHandlerInterface, MiddlewareAwareInterface
+// TODO : attention si on fait un clone de cette classe vérifier si il ne faut pas aussi prévoir un deep clone (cad cloner les objets private de la classe)
+class Route implements MiddlewareAwareInterface
 {
     use MiddlewareAwareTrait;
-    use RouteConditionHandlerTrait;
+
+    /**
+     * @var string|null
+     */
+    protected $host;
+
+    /**
+     * @var string|null
+     */
+    protected $scheme;
+
+    /**
+     * @var int|null
+     */
+    protected $port;
 
     /** @var array */
     private $requirements = [];
@@ -49,27 +64,127 @@ class Route implements RouteConditionHandlerInterface, MiddlewareAwareInterface
     // Créer une RouteInterface et ajouter ces verbs dans l'interface : https://github.com/spiral/router/blob/master/src/RouteInterface.php#L26
     private $methods = ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE'];
 
-    /**
-     * @param string $url
-     * @param RequestHandlerInterface  $handler
-     */
-    public function __construct(string $path, RequestHandlerInterface $handler)
+
+    // disable the constructor, instanciate the class using the static call ::get/::post/::put/...etc
+    private function __construct()
     {
-        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
-        $this->path = sprintf('/%s', ltrim($path, '/'));
-        // TODO : ajouter une vérification pour que le $handler soit un callable ou une string
-        $this->handler = $handler;
     }
 
-    public function getPath(): string
+    public static function get(string $path): self
     {
-        return $this->path;
+        $route = new static();
+
+        $route->methods = [Method::GET];
+        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
+        $route->path = sprintf('/%s', ltrim($path, '/'));
+
+        return $route;
     }
+    public static function post(string $path): self
+    {
+        $route = new static();
+
+        $route->methods = [Method::POST];
+        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
+        $route->path = sprintf('/%s', ltrim($path, '/'));
+
+        return $route;
+    }
+    public static function put(string $path): self
+    {
+        $route = new static();
+
+        $route->methods = [Method::PUT];
+        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
+        $route->path = sprintf('/%s', ltrim($path, '/'));
+
+        return $route;
+    }
+    public static function delete(string $path): self
+    {
+        $route = new static();
+
+        $route->methods = [Method::DELETE];
+        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
+        $route->path = sprintf('/%s', ltrim($path, '/'));
+
+        return $route;
+    }
+    public static function patch(string $path): self
+    {
+        $route = new static();
+
+        $route->methods = [Method::PATCH];
+        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
+        $route->path = sprintf('/%s', ltrim($path, '/'));
+
+        return $route;
+    }
+    public static function head(string $path): self
+    {
+        $route = new static();
+
+        $route->methods = [Method::HEAD];
+        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
+        $route->path = sprintf('/%s', ltrim($path, '/'));
+
+        return $route;
+    }
+    public static function options(string $path): self
+    {
+        $route = new static();
+
+        $route->methods = [Method::OPTIONS];
+        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
+        $route->path = sprintf('/%s', ltrim($path, '/'));
+
+        return $route;
+    }
+    public static function any(string $path): self
+    {
+        $route = new static();
+
+        $route->methods = Method::ANY;
+        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
+        $route->path = sprintf('/%s', ltrim($path, '/'));
+
+        return $route;
+    }
+    public static function methods(array $methods, string $path): self
+    {
+        $route = new static();
+
+        $route->methods = $methods;
+        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
+        $route->path = sprintf('/%s', ltrim($path, '/'));
+
+        return $route;
+    }
+
+
+    /**
+     * Speicifes a handler that should be invoked for a matching route.
+     *
+     * @param RequestHandlerInterface $handler
+     * @return Route
+     */
+    public function to(RequestHandlerInterface $handler): self
+    {
+        $this->handler = $handler;
+
+        return $this;
+    }
+
 
     // return : mixed => should be a string or a callable
     public function getHandler(): RequestHandlerInterface
     {
         return $this->handler;
+    }
+
+    public function getPath(): string
+    {
+        return $this->path;
     }
 
     /**
@@ -383,7 +498,7 @@ class Route implements RouteConditionHandlerInterface, MiddlewareAwareInterface
             );
         }
         if (false === array_reduce($methods, function ($valid, $method) {
-            if (false === $valid) {
+            if ($valid === false) {
                 return false;
             }
             if (! is_string($method)) {
@@ -400,5 +515,137 @@ class Route implements RouteConditionHandlerInterface, MiddlewareAwareInterface
         }
 
         return array_map('strtoupper', $methods);
+    }
+
+    /**
+     * Get the host condition.
+     *
+     * @return string|null
+     */
+    public function getHost(): ?string
+    {
+        return $this->host;
+    }
+
+    /**
+     * Set the host condition.
+     *
+     * @param string $host
+     *
+     * @return static
+     */
+    public function setHost(string $host): self
+    {
+        $this->host = $host;
+
+        return $this;
+    }
+
+    /**
+     * Alias function for "setHost()".
+     *
+     * @param string $host
+     *
+     * @return static
+     */
+    public function host(string $host): self
+    {
+        return $this->setHost($host);
+    }
+
+    /**
+     * Get the scheme condition.
+     *
+     * @return string|null
+     */
+    public function getScheme(): ?string
+    {
+        return $this->scheme;
+    }
+
+    /**
+     * Set the scheme condition.
+     *
+     * @param string $scheme
+     *
+     * @return static
+     */
+    public function setScheme(string $scheme): self
+    {
+        $this->scheme = strtolower($scheme);
+
+        return $this;
+    }
+
+    /**
+     * Alias function for "setScheme()".
+     *
+     * @param string $scheme
+     *
+     * @return static
+     */
+    public function scheme(string $scheme): self
+    {
+        return $this->setScheme($scheme);
+    }
+
+    /**
+     * Helper - Sets the scheme requirement to HTTP (no HTTPS).
+     *
+     * @param string $scheme
+     *
+     * @return static
+     */
+    public function requireHttp(): self
+    {
+        return $this->setScheme('http');
+    }
+
+    /**
+     * Helper - Sets the scheme requirement to HTTPS.
+     *
+     * @param string $scheme
+     *
+     * @return static
+     */
+    public function requireHttps(): self
+    {
+        return $this->setScheme('https');
+    }
+
+   /**
+     * Get the port condition.
+     *
+     * @return int|null
+     */
+    public function getPort(): ?int
+    {
+        return $this->port;
+    }
+
+    /**
+     * Set the port condition.
+     *
+     * @param int $port
+     *
+     * @return static
+     */
+    public function setPort(int $port): self
+    {
+        $this->port = $port;
+
+        return $this;
+    }
+
+    /**
+     * Alias function for "setPort()".
+     *
+     * @param int $port
+     *
+     * @return static
+     */
+    public function port(int $port): self
+    {
+        return $this->setPort($port);
     }
 }

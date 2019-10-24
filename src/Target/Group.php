@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Chiron\Router\Target;
@@ -11,7 +12,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Chiron\Container\ReflectionResolver;
 
 /**
- * WebActionsCaller maps a route like /post/{action} to methods of
+ * Group maps a route like /post/{action} to methods of
  * a class instance specified named as "action" parameter.
  *
  * Dependencies are automatically injected into both method
@@ -21,26 +22,37 @@ use Chiron\Container\ReflectionResolver;
  * Route::anyMethod('/test/{action:\w+}')->to(new WebActionsCaller(TestController::class, $container)),
  * ```
  */
-final class WebActionsCaller implements RequestHandlerInterface
+final class Group implements RequestHandlerInterface
 {
-    private $class;
+    /** @var ContainerInterface */
     private $container;
+    /** @var array */
+    private $controllers;
 
-    public function __construct(ContainerInterface $container, string $class)
+    /**
+     * @param ContainerInterface $container
+     * @param array $controllers
+     */
+    public function __construct(ContainerInterface $container, array $controllers)
     {
-        $this->class = $class;
         $this->container = $container;
+        $this->controllers = $controllers;
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $controller = $this->container->get($this->class);
+        $controllerName = $request->getAttribute('controller');
+
+        if ($controllerName === null) {
+            throw new \RuntimeException('Request does not contain controller attribute.');
+        }
+
+        $controller = $this->controllers[$controllerName];
+
         $action = $request->getAttribute('action');
         if ($action === null) {
             throw new \RuntimeException('Request does not contain action attribute.');
         }
-
-        $action = $this->camelize($action);
 
         if (!method_exists($controller, $action)) {
             // TODO : utiliser une exception HTTP ici ???
@@ -49,20 +61,5 @@ final class WebActionsCaller implements RequestHandlerInterface
         }
 
         return (new ReflectionResolver($this->container))->call([$controller, $action], [$request]);
-    }
-
-    /**
-     * Camelizes a word. This uses the classify() method and turns the first character to lowercase.
-     */
-    private function camelize(string $word) : string
-    {
-        return lcfirst($this->classify($word));
-    }
-    /**
-     * Converts a word into the format for a normalized class name. Converts 'table_name' to 'TableName'.
-     */
-    private function classify(string $word) : string
-    {
-        return str_replace([' ', '_', '-'], '', ucwords($word, ' _-'));
     }
 }

@@ -8,31 +8,30 @@ use Psr\Container\ContainerInterface;
 
 class RouterFactory
 {
-    private $engineFactory;
+    private $routerFactory;
     private $routes;
 
-    public function __construct(callable $engineFactory, $routes = [])
+    public function __construct(callable $routerFactory, $routes = [])
     {
-        $this->engineFactory = $engineFactory;
-        $this->routes = $routes;
+        $this->routerFactory = $routerFactory;
 
         // Factory is wrapped in a closure in order to enforce return type safety.
         /*
-        $this->engineFactory = function (ContainerInterface $container) use ($engineFactory) : RouterInterface {
-            return $engineFactory($container);
+        $this->routerFactory = function (ContainerInterface $container) use ($routerFactory) : RouterInterface {
+            return $routerFactory($container);
         };*/
+
+        $this->routes = $routes;
     }
 
     public function __invoke(ContainerInterface $container): RouterInterface
     {
-        $factory = $this->engineFactory;
+        $router = $this->routerFactory($container);
 
-        /* @var $router RouterInterface */
-        $router = $factory($container);
         foreach ($this->routes as $route) {
             $router->addRoute($route);
         }
-        
+
         return $router;
     }
 }
