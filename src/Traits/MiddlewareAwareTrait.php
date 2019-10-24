@@ -18,17 +18,6 @@ trait MiddlewareAwareTrait
     protected $middlewares = [];
 
     /**
-     * {@inheritdoc}
-     */
-    /*
-    public function middleware($middleware): MiddlewareAwareInterface
-    {
-        $this->middlewares[] = $middleware;
-
-        return $this;
-    }*/
-
-    /**
      * Add a middleware to the end of the stack.
      *
      * @param string|callable|MiddlewareInterface or an array of such arguments $middlewares
@@ -73,6 +62,17 @@ trait MiddlewareAwareTrait
     {
         return $this->middlewares;
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    /*
+    public function middleware($middleware): MiddlewareAwareInterface
+    {
+        $this->middlewares[] = $middleware;
+
+        return $this;
+    }*/
 
     /**
      * {@inheritdoc}

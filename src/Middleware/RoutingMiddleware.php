@@ -44,7 +44,7 @@ class RoutingMiddleware implements MiddlewareInterface
         return $handler->handle($request);
     }
 
-    // have a public visibility to allow the class RouteRunner to perform the Routing if it's not already done (in case the user doesn't add manualy this middleware)
+    // have a public visibility to allow the class RouteHandler to perform the Routing if it's not already done (in case the user doesn't add manualy this middleware)
     public function performRouting(ServerRequestInterface $request) : ServerRequestInterface
     {
         // TODO : il faudrait peut etre récupérer la réponse via un $handle->handle() pour récupérer les headers de la réponse + le charset et version 1.1/1.0 pour le passer dans les exceptions (notfound+methodnotallowed) car on va recréer une nouvelle response !!!! donc si ca se trouve les headers custom genre X-Powered ou CORS vont être perdus lorsqu'on va afficher les message custom pour l'exception 404 par exemple !!!!

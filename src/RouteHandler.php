@@ -9,14 +9,12 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Chiron\Router\Middleware\RoutingMiddleware;
 
-// TODO : renommer en RouteHandler
-class RouteRunner implements RequestHandlerInterface
+class RouteHandler implements RequestHandlerInterface
 {
     /**
      * @var RouterInterface
      */
     private $router;
-
 
     public function __construct(RouterInterface $router) {
         $this->router = $router;
