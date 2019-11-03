@@ -10,13 +10,11 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Chiron\Container\ReflectionResolver;
+use Chiron\Container\Invoker;
 use InvalidArgumentException;
 
 /**
- * Action maps a route to specified class instance and method.
- *
- * Dependencies are automatically injected into both method
- * and constructor based on types specified.
+ * Targets to specific controller action or actions.
  *
  * ```php
  * new Action(HomeController::class, "index");
@@ -24,7 +22,7 @@ use InvalidArgumentException;
  * ```
  *
  */
-final class Action implements RequestHandlerInterface
+final class Action implements TargetInterface
 {
     /** @var ContainerInterface */
     private $container;
@@ -54,14 +52,48 @@ final class Action implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        // TODO : lever une exception si le container>has() ne trouve pas le controller !!!!
         $controller = $this->container->get($this->controller);
 
+        // TODO : à virer c'est pour un test !!!!
+        $this->container->add(ServerRequestInterface::class, $request);
+
+
+/*
         $default = null;
         if (is_string($this->action)) {
             $default = $this->action;
         }
         $action = $request->getAttribute('action', $default);
+        */
 
-        return (new ReflectionResolver($this->container))->call([$controller, $action], [$request]);
+        $action = $request->getAttribute('action');
+
+        $resolver = new ControllerResolver();
+
+        $resolved = $resolver->getController([$controller, $action], $request);
+
+
+        //return (new ReflectionResolver($this->container))->call([$controller, $action], [$request]);
+        //return (new Invoker($this->container))->call([$controller, $action], [$request]);
+        return (new Invoker($this->container))->call($resolved, [$request]);
+    }
+
+    public function getDefaults(): array
+    {
+        if (is_string($this->action)) {
+            return ['action' => $this->action];
+        } else {
+            return ['action' => null];
+        }
+    }
+
+    public function getConstrains(): array
+    {
+        if (is_string($this->action)) {
+            return ['action' => $this->action];
+        } else {
+            return ['action' => join('|', $this->action)];
+        }
     }
 }

@@ -12,11 +12,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Chiron\Container\ReflectionResolver;
 
 /**
- * Controller maps a route like /post/{action} to methods of
- * a class instance specified named as "action" parameter.
- *
- * Dependencies are automatically injected into both method
- * and constructor based on types specified.
+ * Targets to all actions in specific controller. Variation of Action without action constrain.
  *
  * ```php
  * new Controller(HomeController::class);
@@ -55,5 +51,15 @@ final class Controller implements RequestHandlerInterface
         }
 
         return (new ReflectionResolver($this->container))->call([$controller, $action], [$request]);
+    }
+
+    public function getDefaults(): array
+    {
+        return ['action' => null];
+    }
+
+    public function getConstrains(): array
+    {
+        return ['action' => null;
     }
 }

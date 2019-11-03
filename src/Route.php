@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chiron\Router;
 
+use Chiron\Router\Handler\TargetInterface;
 use Chiron\Router\Traits\MiddlewareAwareInterface;
 use Chiron\Router\Traits\MiddlewareAwareTrait;
 use Chiron\Router\Traits\RouteConditionHandlerInterface;
@@ -165,11 +166,16 @@ class Route implements MiddlewareAwareInterface
     /**
      * Speicifes a handler that should be invoked for a matching route.
      *
-     * @param RequestHandlerInterface $handler
+     * @param RequestHandlerInterface $handler the handler could also be a TargetInterface (it implements the RequestHandlerInterface)
      * @return Route
      */
     public function to(RequestHandlerInterface $handler): self
     {
+        if ($handler instanceof TargetInterface) {
+            $this->addDefaults($handler->getDefaults());
+            $this->addRequirements($handler->getConstrains());
+        }
+
         $this->handler = $handler;
 
         return $this;

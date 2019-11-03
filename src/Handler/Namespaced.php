@@ -12,11 +12,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Chiron\Container\ReflectionResolver;
 
 /**
- * Namespaced maps a route like /post/{action} to methods of
- * a class instance specified named as "action" parameter.
- *
- * Dependencies are automatically injected into both method
- * and constructor based on types specified.
+ * Provides ability to invoke any controller from given namespace.
  *
  * ```php
  * new Namespaced("App\Controllers");
@@ -59,6 +55,7 @@ final class Namespaced implements RequestHandlerInterface
         );
 
         $controller = $this->container->get($class);
+
         $action = $request->getAttribute('action');
         if ($action === null) {
             throw new \RuntimeException('Request does not contain action attribute.');
@@ -73,6 +70,15 @@ final class Namespaced implements RequestHandlerInterface
         return (new ReflectionResolver($this->container))->call([$controller, $action], [$request]);
     }
 
+    public function getDefaults(): array
+    {
+        return ['controller' => null, 'action' => null];
+    }
+
+    public function getConstrains(): array
+    {
+        return ['controller' => null, 'action' => null];
+    }
 
     /**
      * Converts a word into the format for a Doctrine class name. Converts 'table_name' to 'TableName'.

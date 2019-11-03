@@ -12,11 +12,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Chiron\Container\ReflectionResolver;
 
 /**
- * Group maps a route like /post/{action} to methods of
- * a class instance specified named as "action" parameter.
- *
- * Dependencies are automatically injected into both method
- * and constructor based on types specified.
+ * Provides ability to invoke from a given controller set:
  *
  * ```php
  * new Group(['signup' => SignUpController::class]);
@@ -39,6 +35,7 @@ final class Group implements RequestHandlerInterface
         $this->controllers = $controllers;
     }
 
+    //return join('|', $values);
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         $controllerName = $request->getAttribute('controller');
@@ -61,5 +58,15 @@ final class Group implements RequestHandlerInterface
         }
 
         return (new ReflectionResolver($this->container))->call([$controller, $action], [$request]);
+    }
+
+    public function getDefaults(): array
+    {
+        return ['controller' => null, 'action' => null];
+    }
+
+    public function getConstrains(): array
+    {
+        return ['controller' => join('|', array_keys($controllers)), 'action' => null];
     }
 }
