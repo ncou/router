@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Chiron\Container\ReflectionResolver;
+use Chiron\Invoker\Invoker;
 
 /**
  * Targets to all actions in specific controller. Variation of Action without action constrain.
@@ -37,20 +37,21 @@ final class Controller implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $controller = $this->container->get($this->controller);
+        //$controller = $this->container->get($this->controller);
 
         $action = $request->getAttribute('action');
         if ($action === null) {
             throw new \RuntimeException('Request does not contain action attribute.');
         }
 
+        /*
         if (!method_exists($controller, $action)) {
             // TODO : utiliser une exception HTTP ici ???
             throw new \RuntimeException('Bad Request.');
             //return $handler->handle($request);
-        }
+        }*/
 
-        return (new ReflectionResolver($this->container))->call([$controller, $action], [$request]);
+        return (new Invoker($this->container))->call([$this->controller, $action], [$request]);
     }
 
     public function getDefaults(): array

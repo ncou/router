@@ -9,7 +9,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Chiron\Container\ReflectionResolver;
+use Chiron\Invoker\Invoker;
 
 /**
  * Callback wraps arbitrary PHP callback into object matching [[MiddlewareInterface]].
@@ -44,6 +44,6 @@ final class Callback implements RequestHandlerInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         // TODO : il faut surement stocker la $request dans un tableau avec la clé = au nom de la classe pour permettre au Invoker de matcher la request avec via un Autowire avec ce paramétre du tableau
-        return (new ReflectionResolver($this->container))->call($this->callback, [$request]);
+        return (new Invoker($this->container))->call($this->callback, [$request]);
     }
 }

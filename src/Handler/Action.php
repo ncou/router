@@ -36,6 +36,7 @@ final class Action implements TargetInterface
      * @param string       $controller Controller class name.
      * @param string|array $action     One or multiple allowed actions.
      */
+    // TODO : initialiser le paramétre $astion avec la valeur 'index' ????
     public function __construct(ContainerInterface $container, string $controller, $action)
     {
         if (!is_string($action) && !is_array($action)) {
@@ -67,6 +68,7 @@ final class Action implements TargetInterface
         $action = $request->getAttribute('action', $default);
         */
 
+        // TODO : lever une exception si action est null ????
         $action = $request->getAttribute('action');
 
         //$resolver = new ControllerResolver();

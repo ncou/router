@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Chiron\Container\ReflectionResolver;
+use Chiron\Invoker\Invoker;
 
 /**
  * Provides ability to invoke from a given controller set:
@@ -51,13 +51,14 @@ final class Group implements RequestHandlerInterface
             throw new \RuntimeException('Request does not contain action attribute.');
         }
 
+        /*
         if (!method_exists($controller, $action)) {
             // TODO : utiliser une exception HTTP ici ???
             throw new \RuntimeException('Bad Request.');
             //return $handler->handle($request);
-        }
+        }*/
 
-        return (new ReflectionResolver($this->container))->call([$controller, $action], [$request]);
+        return (new Invoker($this->container))->call([$controller, $action], [$request]);
     }
 
     public function getDefaults(): array
