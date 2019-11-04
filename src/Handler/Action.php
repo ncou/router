@@ -10,7 +10,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Chiron\Container\ReflectionResolver;
-use Chiron\Container\Invoker;
+use Chiron\Invoker\Invoker;
 use InvalidArgumentException;
 
 /**
@@ -53,7 +53,7 @@ final class Action implements TargetInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         // TODO : lever une exception si le container>has() ne trouve pas le controller !!!!
-        $controller = $this->container->get($this->controller);
+        //$controller = $this->container->get($this->controller);
 
         // TODO : à virer c'est pour un test !!!!
         $this->container->add(ServerRequestInterface::class, $request);
@@ -69,14 +69,14 @@ final class Action implements TargetInterface
 
         $action = $request->getAttribute('action');
 
-        $resolver = new ControllerResolver();
+        //$resolver = new ControllerResolver();
 
-        $resolved = $resolver->getController([$controller, $action], $request);
+        //$resolved = $resolver->getController([$controller, $action], $request);
 
 
         //return (new ReflectionResolver($this->container))->call([$controller, $action], [$request]);
         //return (new Invoker($this->container))->call([$controller, $action], [$request]);
-        return (new Invoker($this->container))->call($resolved, [$request]);
+        return (new Invoker($this->container))->call([$this->controller, $action], [$request]);
     }
 
     public function getDefaults(): array
