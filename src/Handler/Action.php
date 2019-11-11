@@ -11,6 +11,8 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Chiron\Container\ReflectionResolver;
 use Chiron\Invoker\Invoker;
+use Chiron\Invoker\Exception\InvocationException;
+use Chiron\Http\Exception\Client\BadRequestHttpException;
 use InvalidArgumentException;
 
 /**
@@ -36,12 +38,12 @@ final class Action implements TargetInterface
      * @param string       $controller Controller class name.
      * @param string|array $action     One or multiple allowed actions.
      */
-    // TODO : initialiser le paramétre $astion avec la valeur 'index' ????
+    // TODO : initialiser le paramétre $astion avec la valeur par défaut 'index' ????
     public function __construct(ContainerInterface $container, string $controller, $action)
     {
         if (!is_string($action) && !is_array($action)) {
             throw new InvalidArgumentException(sprintf(
-                'Action parameter must type string or array, `%s` given.',
+                'Action parameter must have type string or array, `%s` given.',
                 gettype($action)
             ));
         }
@@ -49,6 +51,8 @@ final class Action implements TargetInterface
         $this->container = $container;
         $this->controller = $controller;
         $this->action = $action;
+
+        $this->invoker = new Invoker($this->container);
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
@@ -70,6 +74,7 @@ final class Action implements TargetInterface
 
         // TODO : lever une exception si action est null ????
         $action = $request->getAttribute('action');
+        //$action = null;
 
         //$resolver = new ControllerResolver();
 
@@ -78,7 +83,15 @@ final class Action implements TargetInterface
 
         //return (new ReflectionResolver($this->container))->call([$controller, $action], [$request]);
         //return (new Invoker($this->container))->call([$controller, $action], [$request]);
-        return (new Invoker($this->container))->call([$this->controller, $action], [$request]);
+
+        try {
+            $response = $this->invoker->call([$this->controller, $action], [$request]);
+        } catch (InvocationException $e) {
+            // TODO : améliorer le code pour permettre de passer en paramétre l'exception précédente ($e) à cette http exception
+            throw new BadRequestHttpException();
+        }
+
+        return $response;
     }
 
     public function getDefaults(): array
