@@ -7,6 +7,7 @@ namespace Chiron\Router;
 use function strtoupper;
 
 // TODO : classe à renommer en HttpMethods ????
+// TODO : enrichir la méthode ->any()    https://github.com/narrowspark/framework/blob/2866c328dfeec4cc78f8c25f412832bb2e9da5e2/src/Viserio/Component/Routing/Router.php#L191
 final class Method
 {
     public const GET = 'GET';

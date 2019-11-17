@@ -24,6 +24,7 @@ use InvalidArgumentException;
  * ```
  *
  */
+//https://github.com/PHP-DI/Slim-Bridge/blob/master/src/ControllerInvoker.php#L43
 final class Action implements TargetInterface
 {
     /** @var ContainerInterface */
@@ -55,11 +56,13 @@ final class Action implements TargetInterface
         $this->invoker = new Invoker($this->container);
     }
 
+    //https://github.com/PHP-DI/Slim-Bridge/blob/master/src/ControllerInvoker.php#L43
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         // TODO : lever une exception si le container>has() ne trouve pas le controller !!!!
         //$controller = $this->container->get($this->controller);
 
+        //https://github.com/PHP-DI/Slim-Bridge/blob/master/src/ControllerInvoker.php#L43
         // TODO : à virer c'est pour un test !!!!
         $this->container->add(ServerRequestInterface::class, $request);
 
