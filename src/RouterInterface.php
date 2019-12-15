@@ -18,13 +18,13 @@ interface RouterInterface extends MiddlewareAwareInterface, RequestHandlerInterf
      * Set the base path.
      * Useful if you are running your application from a subdirectory.
      */
-    public function setBasePath(string $basePath): void;
+    //public function setBasePath(string $basePath): void;
 
     /**
      * Get the router base path.
      * Useful if you are running your application from a subdirectory.
      */
-    public function getBasePath(): string;
+    //public function getBasePath(): string;
 
     public function urlFor(string $routeName, array $substitutions = [], array $queryParams = []): string;
 
