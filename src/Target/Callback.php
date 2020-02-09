@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chiron\Router\Handler;
+namespace Chiron\Router\Target;
 
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -27,15 +27,15 @@ use Chiron\Invoker\Invoker;
  *
  * @see MiddlewareInterface
  */
-final class Callback implements RequestHandlerInterface
+final class Callback implements TargetInterface
 {
     private $container;
     /**
-     * @var callable a PHP callback matching signature of [RequestHandlerInterface->handle(ServerRequestInterface $request)]].
+     * @var callable|array|string a PHP callback matching signature of [RequestHandlerInterface->handle(ServerRequestInterface $request)]].
      */
     private $callback;
 
-    public function __construct(ContainerInterface $container, callable $callback)
+    public function __construct(ContainerInterface $container, $callback)
     {
         $this->container = $container;
         $this->callback = $callback;
@@ -43,7 +43,22 @@ final class Callback implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        // TODO : à virer c'est pour un test !!!!
+        $this->container->add(ServerRequestInterface::class, $request);
+
         // TODO : il faut surement stocker la $request dans un tableau avec la clé = au nom de la classe pour permettre au Invoker de matcher la request avec via un Autowire avec ce paramétre du tableau
-        return (new Invoker($this->container))->call($this->callback, [$request]);
+        //return (new Invoker($this->container))->call($this->callback, [$request]);
+        //return (new Invoker($this->container))->call($this->callback, [ServerRequestInterface::class => $request]);
+        return (new Invoker($this->container))->call($this->callback, $request->getAttributes());
+    }
+
+    public function getDefaults(): array
+    {
+        return [];
+    }
+
+    public function getRequirements(): array
+    {
+        return [];
     }
 }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chiron\Router\Handler;
+namespace Chiron\Router\Target;
 
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -12,32 +12,39 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Chiron\Invoker\Invoker;
 
 /**
- * Targets to all actions in specific controller. Variation of Action without action constrain.
+ * Provides ability to invoke from a given controller set:
  *
  * ```php
- * new Controller(HomeController::class);
+ * new Group(['signup' => SignUpController::class]);
  * ```
  */
-final class Controller implements RequestHandlerInterface
+final class Group implements RequestHandlerInterface
 {
     /** @var ContainerInterface */
     private $container;
-    /** @var string */
-    private $controller;
+    /** @var array */
+    private $controllers;
 
     /**
      * @param ContainerInterface $container
-     * @param string $controller
+     * @param array $controllers
      */
-    public function __construct(ContainerInterface $container, string $controller)
+    public function __construct(ContainerInterface $container, array $controllers)
     {
         $this->container = $container;
-        $this->controller = $controller;
+        $this->controllers = $controllers;
     }
 
+    //return join('|', $values);
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        //$controller = $this->container->get($this->controller);
+        $controllerName = $request->getAttribute('controller');
+
+        if ($controllerName === null) {
+            throw new \RuntimeException('Request does not contain controller attribute.');
+        }
+
+        $controller = $this->controllers[$controllerName];
 
         $action = $request->getAttribute('action');
         if ($action === null) {
@@ -51,16 +58,16 @@ final class Controller implements RequestHandlerInterface
             //return $handler->handle($request);
         }*/
 
-        return (new Invoker($this->container))->call([$this->controller, $action], [$request]);
+        return (new Invoker($this->container))->call([$controller, $action], [$request]);
     }
 
     public function getDefaults(): array
     {
-        return ['action' => null];
+        return ['controller' => null, 'action' => null];
     }
 
-    public function getConstrains(): array
+    public function getRequirements(): array
     {
-        return ['action' => null;
+        return ['controller' => join('|', array_keys($controllers)), 'action' => null];
     }
 }

@@ -12,7 +12,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 interface RouterInterface extends MiddlewareAwareInterface, RequestHandlerInterface
 {
 
-    public function match(ServerRequestInterface $request): RouteResult;
+    public function match(ServerRequestInterface $request): MatchingResult;
 
     /**
      * Set the base path.

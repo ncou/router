@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chiron\Router\Handler;
+namespace Chiron\Router\Target;
 
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -76,7 +76,7 @@ final class Namespaced implements RequestHandlerInterface
         return ['controller' => null, 'action' => null];
     }
 
-    public function getConstrains(): array
+    public function getRequirements(): array
     {
         return ['controller' => null, 'action' => null];
     }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Chiron\Router;
 
-use Chiron\Router\Handler\TargetInterface;
+use Chiron\Router\Target\TargetInterface;
 use Chiron\Router\Traits\MiddlewareAwareInterface;
 use Chiron\Router\Traits\MiddlewareAwareTrait;
 use Chiron\Router\Traits\RouteConditionHandlerInterface;
@@ -14,7 +14,8 @@ use InvalidArgumentException;
 
 //https://github.com/symfony/routing/blob/master/Route.php
 
-// TODO : attention si on fait un clone de cette classe vérifier si il ne faut pas aussi prévoir un deep clone (cad cloner les objets private de la classe)
+// TODO : passer la classe en final et virer les champs protected
+// TODO : utiliser le point d'interrogation et ?null pour initialiser certaines variables   => https://github.com/yiisoft/router/blob/master/src/Route.php#L19 pour fonctionner en version 7.4 !!!!
 class Route implements MiddlewareAwareInterface
 {
     use MiddlewareAwareTrait;
@@ -63,10 +64,11 @@ class Route implements MiddlewareAwareInterface
      * @var array
      */
     // Créer une RouteInterface et ajouter ces verbs dans l'interface : https://github.com/spiral/router/blob/master/src/RouteInterface.php#L26
+    // TODO : cette initialisation ne semble pas nécessaire !!!!
     private $methods = ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE'];
 
 
-    // disable the constructor, instanciate the class using the static call ::get/::post/::put/...etc
+    // disable the constructor, instanciate the class using the static call ::get or ::post or ::put/...etc
     private function __construct()
     {
     }
@@ -151,10 +153,13 @@ class Route implements MiddlewareAwareInterface
 
         return $route;
     }
+    // TODO : renommer cette fonction en "map()"
+    // TODO : intervertir l'ordre pour les paramétres, mettre le $path en premier
     public static function methods(array $methods, string $path): self
     {
         $route = new static();
 
+        // TODO : ne passe initialiser directement cette variable de classe mais passer par le setter setAllowedMethods car il y a une vérification/controle du format de la chaine
         $route->methods = $methods;
         // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
         $route->path = sprintf('/%s', ltrim($path, '/'));
@@ -169,11 +174,13 @@ class Route implements MiddlewareAwareInterface
      * @param RequestHandlerInterface $handler the handler could also be a TargetInterface (it implements the RequestHandlerInterface)
      * @return Route
      */
+    // TODO : gérer le cas ou l'utilisateur n'appel pas cette méthode et donc que le $this->handler est null, car on aura un typeerror quand on va récupérer la valeur via le getteur getHandler() qui doit retourner un objet de type ServerRequestHandlerInterface !!!!!!!!!!!!
     public function to(RequestHandlerInterface $handler): self
     {
         if ($handler instanceof TargetInterface) {
+        //if (is_subclass_of($handler, TargetInterface::class)) {
             $this->addDefaults($handler->getDefaults());
-            $this->addRequirements($handler->getConstrains());
+            $this->addRequirements($handler->getRequirements());
         }
 
         $this->handler = $handler;
@@ -182,8 +189,8 @@ class Route implements MiddlewareAwareInterface
     }
 
 
-    // return : mixed => should be a string or a callable
-    public function getHandler(): RequestHandlerInterface
+    // return : null|RequestHandlerInterface The return null arrive only if the ->to() function hasn't been called (in case the used want to use the last middleware as a response creator)
+    public function getHandler(): ?RequestHandlerInterface
     {
         return $this->handler;
     }

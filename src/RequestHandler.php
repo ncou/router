@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 declare(strict_types=1);
 
@@ -11,7 +11,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Sunrise\Http\Message\ResponseFactory;
 
 /**
  * RequestHandler
@@ -19,30 +18,50 @@ use Sunrise\Http\Message\ResponseFactory;
  * @link https://www.php-fig.org/psr/psr-15/
  * @link https://www.php-fig.org/psr/psr-15/meta/
  */
-class RequestHandler implements RequestHandlerInterface
+// TODO : renommer la classe en "Pipeline"
+final class RequestHandler implements RequestHandlerInterface
 {
 
     /**
      * The request handler middleware queue
      *
-     * @var array
+     * @var array MiddlewareInterface[]
      */
-    protected $middlewares;
+    private $queue = [];
 
     /**
      * The request handler fallback when queue is empty
      *
      * @var RequestHandlerInterface
      */
-    protected $fallback;
+    private $fallback;
 
     /**
      * Constructor of the class
      */
-    public function __construct(array $middlewares, RequestHandlerInterface $fallback)
+    public function __construct()
     {
-        $this->middlewares = $middlewares;
+        $this->fallback = new EmptyPipelineHandler();
+    }
+
+    /**
+     * @param MiddlewareInterface $middleware Middleware to add at the end of the queue.
+     */
+    public function pipe(MiddlewareInterface $middleware): self
+    {
+        $this->queue[] = $middleware;
+
+        return $this;
+    }
+
+    /**
+     * @param MiddlewareInterface $middleware Middleware to add at the end of the queue.
+     */
+    public function setFallback(RequestHandlerInterface $fallback): self
+    {
         $this->fallback = $fallback;
+
+        return $this;
     }
 
     /**
@@ -50,13 +69,11 @@ class RequestHandler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request) : ResponseInterface
     {
-        $middleware = array_shift($this->middlewares);
+        $middleware = array_shift($this->queue);
 
         if (is_null($middleware)) {
             return $this->fallback->handle($request);
         }
-
-        // TODO : ajouter ici un check sur l'nstanceof de l'objet middleware et si ce n'est pas un objet de type MiddlewareInterface alors on léve un runtime exception
 
         return $middleware->process($request, $this);
     }

@@ -13,7 +13,7 @@ use Chiron\Http\Exception\Client\MethodNotAllowedHttpException;
 use Chiron\Http\Exception\Client\NotFoundHttpException;
 //use Chiron\Http\Psr\Response;
 use Chiron\Router\Route;
-use Chiron\Router\RouteResult;
+use Chiron\Router\MatchingResult;
 use Chiron\Router\RouterInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -44,7 +44,7 @@ class RoutingMiddleware implements MiddlewareInterface
         return $handler->handle($request);
     }
 
-    // have a public visibility to allow the class RouteHandler to perform the Routing if it's not already done (in case the user doesn't add manualy this middleware)
+    // have a public visibility to allow the class RoutingHandler to perform the Routing if it's not already done (in case the user doesn't add manualy this middleware)
     public function performRouting(ServerRequestInterface $request) : ServerRequestInterface
     {
         // TODO : il faudrait peut etre récupérer la réponse via un $handle->handle() pour récupérer les headers de la réponse + le charset et version 1.1/1.0 pour le passer dans les exceptions (notfound+methodnotallowed) car on va recréer une nouvelle response !!!! donc si ca se trouve les headers custom genre X-Powered ou CORS vont être perdus lorsqu'on va afficher les message custom pour l'exception 404 par exemple !!!!
@@ -63,10 +63,10 @@ class RoutingMiddleware implements MiddlewareInterface
         }
 
         // add some usefull information about the url used for the routing
-        // TODO : faire plutot porter ces informations (method et uri utilisé) directement dans l'objet RouteResult ??????
+        // TODO : faire plutot porter ces informations (method et uri utilisé) directement dans l'objet MatchingResult ??????
         //$request = $request->withAttribute('routeInfo', [$request->getMethod(), (string) $request->getUri()]);
 
         // Store the actual route result in the request attributes.
-        return $request->withAttribute(RouteResult::class, $result);
+        return $request->withAttribute(MatchingResult::class, $result);
     }
 }

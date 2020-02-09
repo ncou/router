@@ -10,11 +10,12 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 // TODO : regarder ici : https://github.com/l0gicgate/Slim/blob/4.x-DispatcherResults/Slim/DispatcherResults.php
 //https://github.com/slimphp/Slim/blob/4.x/Slim/RoutingResults.php
+//https://github.com/yiisoft/router/blob/master/src/MatchingResult.php
 
 /**
  * Value object representing the results of routing.
  *
- * RouterInterface::match() is defined as returning a RouteResult instance,
+ * RouterInterface::match() is defined as returning a MatchingResult instance,
  * which will contain the following state:
  *
  * - isSuccess()/isFailure() indicate whether routing succeeded or not.
@@ -28,11 +29,10 @@ use Psr\Http\Server\RequestHandlerInterface;
  *   - If the failure was due to HTTP method negotiation, it will contain the
  *     list of allowed HTTP methods.
  *
- * RouteResult instances are consumed by the Application in the routing
+ * MatchingResult instances are consumed by the Application in the routing
  * middleware.
  */
-// TODO : renommer la classe en RoutingResults ????
-class RouteResult implements RequestHandlerInterface
+class MatchingResult implements RequestHandlerInterface
 {
     // TODO : voir si on déplace cette constante dans la classe "Route"
     public const HTTP_METHOD_ANY = null;
@@ -71,7 +71,7 @@ class RouteResult implements RequestHandlerInterface
     private $success;
 
     /**
-     * Only allow instantiation via factory methods (fromRoute or fromRouteFailure).
+     * Only allow instantiation via factory methods (static::fromRoute or static::fromRouteFailure).
      */
     //TODO : à virer !!! et créer un vrai constructeur !!!!
     private function __construct()
@@ -144,6 +144,7 @@ class RouteResult implements RequestHandlerInterface
      * @return false|null|Route false if representing a routing failure;
      *                          null if not created via fromRoute(); Route instance otherwise
      */
+    // TODO : méthode à virer elle ne sert à rien !!!!
     public function getMatchedRoute()
     {
         return $this->isFailure() ? false : $this->route;
@@ -178,6 +179,7 @@ class RouteResult implements RequestHandlerInterface
      *
      * @return false|array
      */
+    // TODO : méthode à virer elle ne sert à rien !!!!
     public function getMatchedRouteMiddlewareStack()
     {
         if ($this->isFailure()) {
@@ -230,7 +232,15 @@ class RouteResult implements RequestHandlerInterface
             $request = $request->withAttribute($param, $value);
         }
 
-        $handler = new RequestHandler($this->route->getMiddlewareStack(), $this->route->getHandler());
+        $handler = new RequestHandler();
+
+        foreach ($this->route->getMiddlewareStack() as $middleware) {
+            $handler->pipe($middleware);
+        }
+
+        if ($this->route->getHandler() !== null) {
+            $handler->setFallback($this->route->getHandler());
+        }
 
         return $handler->handle($request);
     }

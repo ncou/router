@@ -9,7 +9,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Chiron\Router\Middleware\RoutingMiddleware;
 
-class RouteHandler implements RequestHandlerInterface
+class RoutingHandler implements RequestHandlerInterface
 {
     /**
      * @var RouterInterface
@@ -25,16 +25,17 @@ class RouteHandler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $routeResult = $request->getAttribute(RouteResult::class);
+        $result = $request->getAttribute(MatchingResult::class);
 
-        if ($routeResult === null) {
+        // if the user has not added the RoutingMiddleware at the bottom of the stack, we force the call.
+        if ($result === null) {
             $routingMiddleware = new RoutingMiddleware($this->router);
             $request = $routingMiddleware->performRouting($request);
         }
 
-        $routeResult = $request->getAttribute(RouteResult::class);
+        $result = $request->getAttribute(MatchingResult::class);
 
-        return $routeResult->handle($request);
+        return $result->handle($request);
     }
 
 }

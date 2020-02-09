@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chiron\Router\Handler;
+namespace Chiron\Router\Target;
 
 use Psr\Http\Server\RequestHandlerInterface;
 
@@ -25,5 +25,5 @@ interface TargetInterface extends RequestHandlerInterface
      *
      * @return array
      */
-    public function getConstrains(): array;
+    public function getRequirements(): array;
 }

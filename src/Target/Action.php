@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chiron\Router\Handler;
+namespace Chiron\Router\Target;
 
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -59,6 +59,7 @@ final class Action implements TargetInterface
     //https://github.com/PHP-DI/Slim-Bridge/blob/master/src/ControllerInvoker.php#L43
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+
         // TODO : lever une exception si le container>has() ne trouve pas le controller !!!!
         //$controller = $this->container->get($this->controller);
 
@@ -87,6 +88,7 @@ final class Action implements TargetInterface
         //return (new ReflectionResolver($this->container))->call([$controller, $action], [$request]);
         //return (new Invoker($this->container))->call([$controller, $action], [$request]);
 
+
         try {
             $response = $this->invoker->call([$this->controller, $action], [$request]);
         } catch (InvocationException $e) {
@@ -106,7 +108,7 @@ final class Action implements TargetInterface
         }
     }
 
-    public function getConstrains(): array
+    public function getRequirements(): array
     {
         if (is_string($this->action)) {
             return ['action' => $this->action];

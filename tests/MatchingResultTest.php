@@ -5,43 +5,43 @@ declare(strict_types=1);
 namespace Chiron\Tests\Router;
 
 use Chiron\Router\Route;
-use Chiron\Router\RouteResult;
+use Chiron\Router\MatchingResult;
 use Error;
 use PHPUnit\Framework\TestCase;
 
-class RouteResultTest extends TestCase
+class MatchingResultTest extends TestCase
 {
     /**
      * @expectedException Error
-     * @expectedExceptionMessage Call to private Chiron\Routing\RouteResult::__construct()
+     * @expectedExceptionMessage Call to private Chiron\Routing\MatchingResult::__construct()
      */
-    public function testRouteResultCantBeInstancied()
+    public function testClassMatchingResultCantBeInstancied()
     {
-        $result = new RouteResult();
+        $result = new MatchingResult();
     }
 
     public function testRouteNameIsNotRetrievable()
     {
-        $result = RouteResult::fromRouteFailure([]);
+        $result = MatchingResult::fromRouteFailure([]);
         $this->assertFalse($result->getMatchedRouteName());
     }
 
     public function testRouteMiddlewareStackIsNotRetrievable()
     {
-        $result = RouteResult::fromRouteFailure([]);
+        $result = MatchingResult::fromRouteFailure([]);
         $this->assertFalse($result->getMatchedRouteMiddlewareStack());
     }
 
     // TODO : à corriger
     public function testRouteFailureRetrieveAllHttpMethods()
     {
-        $result = RouteResult::fromRouteFailure(RouteResult::HTTP_METHOD_ANY);
-        $this->assertSame(RouteResult::HTTP_METHOD_ANY, $result->getAllowedMethods());
+        $result = MatchingResult::fromRouteFailure(MatchingResult::HTTP_METHOD_ANY);
+        $this->assertSame(MatchingResult::HTTP_METHOD_ANY, $result->getAllowedMethods());
     }
 
     public function testRouteFailureRetrieveHttpMethods()
     {
-        $result = RouteResult::fromRouteFailure([]);
+        $result = MatchingResult::fromRouteFailure([]);
         $this->assertSame([], $result->getAllowedMethods());
     }
 
@@ -49,13 +49,13 @@ class RouteResultTest extends TestCase
     {
         $params = ['foo' => 'bar'];
         $route = $this->prophesize(Route::class);
-        $result = RouteResult::fromRoute($route->reveal(), $params);
+        $result = MatchingResult::fromRoute($route->reveal(), $params);
         $this->assertSame($params, $result->getMatchedParams());
     }
 
     public function testRouteMethodFailure()
     {
-        $result = RouteResult::fromRouteFailure(['GET']);
+        $result = MatchingResult::fromRouteFailure(['GET']);
         $this->assertTrue($result->isMethodFailure());
     }
 
@@ -63,15 +63,15 @@ class RouteResultTest extends TestCase
     {
         $params = ['foo' => 'bar'];
         $route = $this->prophesize(Route::class);
-        $result = RouteResult::fromRoute($route->reveal(), $params);
+        $result = MatchingResult::fromRoute($route->reveal(), $params);
         $this->assertFalse($result->isMethodFailure());
     }
 
     public function testFromRouteShouldComposeRouteInResult()
     {
         $route = $this->prophesize(Route::class);
-        $result = RouteResult::fromRoute($route->reveal(), ['foo' => 'bar']);
-        $this->assertInstanceOf(RouteResult::class, $result);
+        $result = MatchingResult::fromRoute($route->reveal(), ['foo' => 'bar']);
+        $this->assertInstanceOf(MatchingResult::class, $result);
         $this->assertTrue($result->isSuccess());
         $this->assertSame($route->reveal(), $result->getMatchedRoute());
 
@@ -97,14 +97,14 @@ class RouteResultTest extends TestCase
 
     public function testRouteFailureWithNoAllowedHttpMethodsShouldReportTrueForIsMethodFailure()
     {
-        $result = RouteResult::fromRouteFailure([]);
+        $result = MatchingResult::fromRouteFailure([]);
         $this->assertTrue($result->isMethodFailure());
     }
 
     // TODO : à corriger
     public function testFailureResultDoesNotIndicateAMethodFailureIfAllMethodsAreAllowed()
     {
-        $result = RouteResult::fromRouteFailure(RouteResult::HTTP_METHOD_ANY);
+        $result = MatchingResult::fromRouteFailure(MatchingResult::HTTP_METHOD_ANY);
         $this->assertTrue($result->isFailure());
         $this->assertFalse($result->isMethodFailure());
 
@@ -115,8 +115,8 @@ class RouteResultTest extends TestCase
      * @depends testFailureResultDoesNotIndicateAMethodFailureIfAllMethodsAreAllowed
      */
     public function testAllowedMethodsIncludesASingleWildcardEntryWhenAllMethodsAllowedForFailureResult(
-        RouteResult $result
+        MatchingResult $result
     ) {
-        $this->assertSame(RouteResult::HTTP_METHOD_ANY, $result->getAllowedMethods());
+        $this->assertSame(MatchingResult::HTTP_METHOD_ANY, $result->getAllowedMethods());
     }
 }
