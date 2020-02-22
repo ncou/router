@@ -28,6 +28,7 @@ final class RedirectController
      *
      * @return Psr\Http\Message\ResponseInterface
      */
+    // TODO : forcer un cast (string) sur la destination ce qui permettra de passer soit un string soit un objet UriInterface qui sera casté en string.
     public function redirect(string $destination, int $status): ResponseInterface
     {
         $response = $this->factory->createResponse($status);

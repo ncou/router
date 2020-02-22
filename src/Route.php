@@ -14,10 +14,17 @@ use InvalidArgumentException;
 
 //https://github.com/symfony/routing/blob/master/Route.php
 
+// Ajouter les middleware comme des options :    https://github.com/ventoviro/windwalker-core/blob/aaf68793043e84c1374bda8065eebdbc347862ac/src/Core/Router/RouteConfigureTrait.php#L272
+// ajouter des extra dans la route :  https://github.com/ventoviro/windwalker-core/blob/aaf68793043e84c1374bda8065eebdbc347862ac/src/Core/Router/RouteConfigureTrait.php#L353
+// et l'utilitaire pour faire un deep merge (mergeRecursive) :   https://github.com/ventoviro/windwalker-utilities/blob/master/Arr.php#L803
+// et le bout de code pour récupérer les extra : https://github.com/ventoviro/windwalker/blob/8b1aba30967dd0e6c4374aec0085783c3d0f88b4/src/Router/Route.php#L515
+
+// TODO : remplacer le terme Alias dans les commentaires par Proxy
 // TODO : passer la classe en final et virer les champs protected
 // TODO : utiliser le point d'interrogation et ?null pour initialiser certaines variables   => https://github.com/yiisoft/router/blob/master/src/Route.php#L19 pour fonctionner en version 7.4 !!!!
 class Route implements MiddlewareAwareInterface
 {
+    // TODO : virer la classe MiddlewareAwareTrait et lister les méthodes middleware() / getStackMiddleware() dans l'interface.
     use MiddlewareAwareTrait;
 
     /**
@@ -65,108 +72,59 @@ class Route implements MiddlewareAwareInterface
      */
     // Créer une RouteInterface et ajouter ces verbs dans l'interface : https://github.com/spiral/router/blob/master/src/RouteInterface.php#L26
     // TODO : cette initialisation ne semble pas nécessaire !!!!
-    private $methods = ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE'];
+    // TODO : utiliser directement la constante Method::ANY
+    private $methods = Method::ANY; //['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'TRACE'];
 
 
-    // disable the constructor, instanciate the class using the static call ::get or ::post or ::put/...etc
-    private function __construct()
+    public function __construct(string $path)
     {
+        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
+        $this->path = sprintf('/%s', ltrim($path, '/'));
     }
 
     public static function get(string $path): self
     {
-        $route = new static();
-
-        $route->methods = [Method::GET];
-        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
-        $route->path = sprintf('/%s', ltrim($path, '/'));
-
-        return $route;
+        return self::map($path, [Method::GET]);
     }
     public static function post(string $path): self
     {
-        $route = new static();
-
-        $route->methods = [Method::POST];
-        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
-        $route->path = sprintf('/%s', ltrim($path, '/'));
-
-        return $route;
+        return self::map($path, [Method::POST]);
     }
     public static function put(string $path): self
     {
-        $route = new static();
-
-        $route->methods = [Method::PUT];
-        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
-        $route->path = sprintf('/%s', ltrim($path, '/'));
-
-        return $route;
+        return self::map($path, [Method::PUT]);
     }
     public static function delete(string $path): self
     {
-        $route = new static();
-
-        $route->methods = [Method::DELETE];
-        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
-        $route->path = sprintf('/%s', ltrim($path, '/'));
-
-        return $route;
+        return self::map($path, [Method::DELETE]);
     }
     public static function patch(string $path): self
     {
-        $route = new static();
-
-        $route->methods = [Method::PATCH];
-        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
-        $route->path = sprintf('/%s', ltrim($path, '/'));
-
-        return $route;
+        return self::map($path, [Method::PATCH]);
     }
     public static function head(string $path): self
     {
-        $route = new static();
-
-        $route->methods = [Method::HEAD];
-        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
-        $route->path = sprintf('/%s', ltrim($path, '/'));
-
-        return $route;
+        return self::map($path, [Method::HEAD]);
     }
     public static function options(string $path): self
     {
-        $route = new static();
-
-        $route->methods = [Method::OPTIONS];
-        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
-        $route->path = sprintf('/%s', ltrim($path, '/'));
-
-        return $route;
+        return self::map($path, [Method::OPTIONS]);
+    }
+    public static function trace(string $path): self
+    {
+        return self::map($path, [Method::TRACE]);
     }
     public static function any(string $path): self
     {
-        $route = new static();
-
-        $route->methods = Method::ANY;
-        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
-        $route->path = sprintf('/%s', ltrim($path, '/'));
-
-        return $route;
+        return self::map($path, Method::ANY);
     }
-    // TODO : renommer cette fonction en "map()"
-    // TODO : intervertir l'ordre pour les paramétres, mettre le $path en premier
-    public static function methods(array $methods, string $path): self
+    public static function map(string $path, array $methods): self
     {
-        $route = new static();
-
-        // TODO : ne passe initialiser directement cette variable de classe mais passer par le setter setAllowedMethods car il y a une vérification/controle du format de la chaine
-        $route->methods = $methods;
-        // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
-        $route->path = sprintf('/%s', ltrim($path, '/'));
+        $route = new static($path);
+        $route->setAllowedMethods($methods);
 
         return $route;
     }
-
 
     /**
      * Speicifes a handler that should be invoked for a matching route.
@@ -189,7 +147,7 @@ class Route implements MiddlewareAwareInterface
     }
 
 
-    // return : null|RequestHandlerInterface The return null arrive only if the ->to() function hasn't been called (in case the used want to use the last middleware as a response creator)
+    // return : null|RequestHandlerInterface The return null arrive only if the ->to() function hasn't been called (in case the user want to use the last middleware as a response creator)
     public function getHandler(): ?RequestHandlerInterface
     {
         return $this->handler;
@@ -352,21 +310,6 @@ class Route implements MiddlewareAwareInterface
     }
 
     /**
-     * Sets a requirement for the given key.
-     *
-     * @param string $key   The key
-     * @param string $regex The regex
-     *
-     * @return $this
-     */
-    public function setRequirement(string $key, string $regex): self
-    {
-        $this->requirements[$key] = $this->sanitizeRequirement($key, $regex);
-
-        return $this;
-    }
-
-    /**
      * Checks if a requirement is set for the given key.
      *
      * @param string $key A variable name
@@ -384,7 +327,23 @@ class Route implements MiddlewareAwareInterface
         return $this->setRequirement($key, $regex);
     }
 
+    /**
+     * Sets a requirement for the given key.
+     *
+     * @param string $key   The key
+     * @param string $regex The regex
+     *
+     * @return $this
+     */
+    public function setRequirement(string $key, string $regex): self
+    {
+        $this->requirements[$key] = $this->sanitizeRequirement($key, $regex);
+
+        return $this;
+    }
+
     // remove the char "^" at the start of the regex, and the final "$" char at the end of the regex
+    // TODO : éviter les yoda comparaisons
     private function sanitizeRequirement(string $key, string $regex): string
     {
         if ('' !== $regex && '^' === $regex[0]) {
@@ -453,9 +412,16 @@ class Route implements MiddlewareAwareInterface
      *
      * @return self
      */
+    // filtrer les méthodes cf exemple :       https://github.com/slimphp/Slim-Psr7/blob/master/src/Request.php#L155
     public function setAllowedMethods(array $methods): self
     {
-        $this->methods = $this->validateHttpMethods($methods);
+        if (empty($methods)) {
+            throw new InvalidArgumentException(
+                'HTTP methods argument was empty; must contain at least one method'
+            );
+        }
+
+        $this->methods = Method::validateHttpMethods($methods);
 
         return $this;
     }
@@ -491,44 +457,7 @@ class Route implements MiddlewareAwareInterface
         return $this->setAllowedMethods($methods);
     }
 
-    /**
-     * Validate the provided HTTP method names.
-     *
-     * Validates, and then normalizes to upper case.
-     *
-     * @param string[] An array of HTTP method names.
-     *
-     * @throws Exception InvalidArgumentException for any invalid method names.
-     *
-     * @return string[]
-     */
-    // TODO : regarder aussi ici pour une méthode de vérification : https://github.com/cakephp/cakephp/blob/master/src/Routing/Route/Route.php#L197
-    private function validateHttpMethods(array $methods): array
-    {
-        if (empty($methods)) {
-            throw new InvalidArgumentException(
-                'HTTP methods argument was empty; must contain at least one method'
-            );
-        }
-        if (false === array_reduce($methods, function ($valid, $method) {
-            if ($valid === false) {
-                return false;
-            }
-            if (! is_string($method)) {
-                return false;
-            }
-            //if (! preg_match('/^[!#$%&\'*+.^_`\|~0-9a-z-]+$/i', $method)) {
-            if (! preg_match("/^[!#$%&'*+.^_`|~0-9a-z-]+$/i", $method)) {
-                return false;
-            }
 
-            return $valid;
-        }, true)) {
-            throw new InvalidArgumentException('One or more HTTP methods were invalid');
-        }
-
-        return array_map('strtoupper', $methods);
-    }
 
     /**
      * Get the host condition.

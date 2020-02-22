@@ -34,9 +34,6 @@ use Psr\Http\Server\RequestHandlerInterface;
  */
 class MatchingResult implements RequestHandlerInterface
 {
-    // TODO : voir si on déplace cette constante dans la classe "Route"
-    public const HTTP_METHOD_ANY = null;
-
     /**
      * @var null|string[]
      */
@@ -131,7 +128,7 @@ class MatchingResult implements RequestHandlerInterface
      */
     public function isMethodFailure(): bool
     {
-        if ($this->isSuccess() || $this->allowedMethods === self::HTTP_METHOD_ANY) {
+        if ($this->isSuccess() || $this->allowedMethods === null) {
             return false;
         }
 
@@ -238,6 +235,7 @@ class MatchingResult implements RequestHandlerInterface
             $handler->pipe($middleware);
         }
 
+        // the handler could be null if the last middleware attached to the route return a response.
         if ($this->route->getHandler() !== null) {
             $handler->setFallback($this->route->getHandler());
         }

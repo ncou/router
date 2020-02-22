@@ -17,6 +17,13 @@ use Chiron\Router\Controller\RedirectController;
 use Chiron\Router\Controller\ViewController;
 use Chiron\Router\Target\TargetFactory;
 
+
+// GROUP
+//https://github.com/ventoviro/windwalker-core/blob/aaf68793043e84c1374bda8065eebdbc347862ac/src/Core/Router/RouteCreator.php#L89
+
+// RouteData une sorte de proxy pour ajouter certaines infos à la route
+//https://github.com/ventoviro/windwalker-core/blob/aaf68793043e84c1374bda8065eebdbc347862ac/src/Core/Router/RouteData.php
+
 /**
  * Aggregate routes for the router.
  *
@@ -44,6 +51,8 @@ use Chiron\Router\Target\TargetFactory;
 // TODO : passer la classe en "final" et virer le mot clé protected
 // TODO : harmoniser les termes et utiliser le terme "path" pour toute les variables (c'est à dire remplacer $pattern et $url par $path dans cette classe.) Faire la même chose dans le classe "Route"
 // TODO : déplacer cette classe + les deux classes ViewController et RedirectController ainsi que la facade directement dans un répertoire "Routing" qui serait dans le framework Chiron !!!!
+// TODO : utiliser les constantes de la classe Methode (ex : Method::POST / ::TRACE  ...etc)
+// TODO : harmoniser le terme "pattern" versus "path" qui est différent entre les classes Route et RouteCollector. Idem pour la fonction "map()" qui n'a pas la même signature entre les deux classes.
 class RouteCollector
 {
     /**
@@ -116,6 +125,7 @@ class RouteCollector
      *
      * @return \Chiron\Routing\Route
      */
+    // TODO : harmoniser la signature de la méthode avec la classe Route qui contient aussi une méthode statique "map()" mais on peut lui passer un tableau de méthodes en second paramétre.
     public function map(string $path): Route
     {
         // TODO : attention vérifier si cette modification du path avec un slash n'est pas en doublon avec celle qui est faite dans la classe Route !!!!

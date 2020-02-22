@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace Chiron\Router;
 
-use Chiron\Router\Traits\MiddlewareAwareInterface;
-use Chiron\Router\Traits\StrategyAwareInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 
-interface RouterInterface extends MiddlewareAwareInterface, RequestHandlerInterface
+interface RouterInterface
 {
 
     public function match(ServerRequestInterface $request): MatchingResult;
+
+    public function addRoute(Route $route): void;
 
     /**
      * Set the base path.
@@ -25,10 +24,6 @@ interface RouterInterface extends MiddlewareAwareInterface, RequestHandlerInterf
      * Useful if you are running your application from a subdirectory.
      */
     //public function getBasePath(): string;
-
-    public function urlFor(string $routeName, array $substitutions = [], array $queryParams = []): string;
-
-    public function relativeUrlFor(string $routeName, array $substitutions = [], array $queryParams = []): string;
 
     // TODO : ajouter les méthodes : generateUri / getRoutes   => attention pas la peine de mettre la méthode addRoute car c'est géré via map() pour ajouter une route.
     // TODO : réflaichir si on doit ajouter les méthodes : getNamedRoute/removeNamedRoute dans cette interface.
