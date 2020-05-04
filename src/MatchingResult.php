@@ -9,7 +9,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 // TODO : regarder ici : https://github.com/l0gicgate/Slim/blob/4.x-DispatcherResults/Slim/DispatcherResults.php
-//https://github.com/slimphp/Slim/blob/4.x/Slim/RoutingResults.php
+//https://github.com/slimphp/Slim/blob/4.x/Slim/Routing/RoutingResults.php
 //https://github.com/yiisoft/router/blob/master/src/MatchingResult.php
 
 /**
@@ -34,6 +34,10 @@ use Psr\Http\Server\RequestHandlerInterface;
  */
 class MatchingResult implements RequestHandlerInterface
 {
+    /**
+     * @var string
+     */
+    public const ATTRIBUTE = '__MatchingResult__';
     /**
      * @var null|string[]
      */
@@ -64,13 +68,11 @@ class MatchingResult implements RequestHandlerInterface
     /**
      * @var bool success state of routing
      */
-    // TODO : mettre expressement le résultat à false.
     private $success;
 
     /**
      * Only allow instantiation via factory methods (static::fromRoute or static::fromRouteFailure).
      */
-    //TODO : à virer !!! et créer un vrai constructeur !!!!
     private function __construct()
     {
     }
@@ -80,7 +82,6 @@ class MatchingResult implements RequestHandlerInterface
      *
      * @param array $params parameters associated with the matched route, if any
      */
-    // TODO : déplacer cette méthode dans le dispatcher !!!
     public static function fromRoute(Route $route, array $params = []): self
     {
         $result = new self();
@@ -94,11 +95,9 @@ class MatchingResult implements RequestHandlerInterface
     /**
      * Create an instance representing a route failure.
      *
-     * @param null|array $methods HTTP methods allowed for the current URI, if any.
-     *                            null is equivalent to allowing any HTTP method; empty array means none.
+     * @param array $methods HTTP methods allowed for the current URI.
      */
-    // TODO : déplacer cette méthode dans le dispatcher !!!
-    public static function fromRouteFailure(?array $methods): self
+    public static function fromRouteFailure(array $methods): self
     {
         $result = new self();
         $result->success = false;
@@ -116,7 +115,7 @@ class MatchingResult implements RequestHandlerInterface
     }
 
     /**
-     * Is this a routing failure result?
+     * Is this a routing failure result? (could be a not found failure or an invalid method failure)
      */
     public function isFailure(): bool
     {
@@ -128,11 +127,7 @@ class MatchingResult implements RequestHandlerInterface
      */
     public function isMethodFailure(): bool
     {
-        if ($this->isSuccess() || $this->allowedMethods === null) {
-            return false;
-        }
-
-        return true;
+        return $this->isFailure() && $this->allowedMethods !== Method::ANY;
     }
 
     /**
@@ -195,7 +190,6 @@ class MatchingResult implements RequestHandlerInterface
      *
      * Guaranted to return an array, even if it is simply empty.
      */
-    // TODO : faire un rawurldecode sur les paramétres ???? => https://github.com/slimphp/Slim/blob/4.x/Slim/RoutingResults.php#L121
     public function getMatchedParams(): array
     {
         return $this->matchedParams;
@@ -204,9 +198,9 @@ class MatchingResult implements RequestHandlerInterface
     /**
      * Retrieve the allowed methods for the route failure.
      *
-     * @return null|string[] HTTP methods allowed
+     * @return string[] HTTP methods allowed
      */
-    public function getAllowedMethods(): ?array
+    public function getAllowedMethods(): array
     {
         if ($this->isSuccess()) {
             return $this->route
@@ -224,7 +218,7 @@ class MatchingResult implements RequestHandlerInterface
         //$params = array_merge($this->route->getDefaults(), $this->matchedParams, [ServerRequestInterface::class => $request]);
         $params = array_merge($this->route->getDefaults(), $this->matchedParams);
 
-        // Inject individual matched parameters.
+        // Inject individual matched parameters in the Request.
         foreach ($params as $param => $value) {
             $request = $request->withAttribute($param, $value);
         }
@@ -235,7 +229,7 @@ class MatchingResult implements RequestHandlerInterface
             $handler->pipe($middleware);
         }
 
-        // the handler could be null if the last middleware attached to the route return a response.
+        // the fallback handler could be null if the last middleware attached to the route return a response.
         if ($this->route->getHandler() !== null) {
             $handler->setFallback($this->route->getHandler());
         }

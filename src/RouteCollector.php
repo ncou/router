@@ -17,9 +17,14 @@ use Chiron\Router\Controller\RedirectController;
 use Chiron\Router\Controller\ViewController;
 use Chiron\Router\Target\TargetFactory;
 
+use Chiron\Container\SingletonInterface;
+
+//https://github.com/fratily/router/blob/master/src/RouteCollector.php
 
 // GROUP
 //https://github.com/ventoviro/windwalker-core/blob/aaf68793043e84c1374bda8065eebdbc347862ac/src/Core/Router/RouteCreator.php#L89
+//https://github.com/auraphp/Aura.Router/blob/3.x/src/Map.php#L373
+//https://github.com/nikic/FastRoute/blob/master/src/RouteCollector.php#L47
 
 // RouteData une sorte de proxy pour ajouter certaines infos à la route
 //https://github.com/ventoviro/windwalker-core/blob/aaf68793043e84c1374bda8065eebdbc347862ac/src/Core/Router/RouteData.php
@@ -48,22 +53,26 @@ use Chiron\Router\Target\TargetFactory;
 // TODO : ajouter la gestion des "Group"
 // TODO : ajouter une méthode addRoute(Route $route) et une autre addRoutes(array $routes) pour injecter des objets Route directement dans le router !!!!
 // TODO : ajouter une méthode "getRoutes" ????
-// TODO : passer la classe en "final" et virer le mot clé protected
 // TODO : harmoniser les termes et utiliser le terme "path" pour toute les variables (c'est à dire remplacer $pattern et $url par $path dans cette classe.) Faire la même chose dans le classe "Route"
 // TODO : déplacer cette classe + les deux classes ViewController et RedirectController ainsi que la facade directement dans un répertoire "Routing" qui serait dans le framework Chiron !!!!
 // TODO : utiliser les constantes de la classe Methode (ex : Method::POST / ::TRACE  ...etc)
 // TODO : harmoniser le terme "pattern" versus "path" qui est différent entre les classes Route et RouteCollector. Idem pour la fonction "map()" qui n'a pas la même signature entre les deux classes.
-class RouteCollector
+final class RouteCollector implements SingletonInterface
 {
     /**
      * @var RouterInterface
      */
-    protected $router;
+    private $router;
 
     /**
      * @var TargetFactory
      */
-    protected $target;
+    private $target;
+
+    /**
+     * @var string Can be used to ignore leading part of the Request URL (if main file lives in subdirectory of host)
+     */
+    private $basePath;
 
     /**
      * List of all routes registered directly with the application.
@@ -78,47 +87,30 @@ class RouteCollector
         $this->target = $target;
     }
 
-
-
     /**
-     * Add a route for the route middleware to match.
-     *
-     * Accepts a combination of a path and middleware, and optionally the HTTP methods allowed.
-     *
-     * @param null|array $methods HTTP method to accept; null indicates any.
-     * @param null|string $name The name of the route.
-     * @throws Exception\DuplicateRouteException if specification represents an existing route.
+     * Set the base path.
+     * Useful if you are running your application from a subdirectory.
      */
-    // TODO : métohde à virer
-    public function route(
-        string $path,
-        MiddlewareInterface $middleware,
-        array $methods = null,
-        string $name = null
-    ) : Route {
-        $this->checkForDuplicateRoute($path, $methods);
+    // TODO : tester cette méthode et réfléchir à comment on trim de slash '/' (plutot à gauche ou droite ou les deux ????).
+    public function setBasePath(string $basePath): void
+    {
+        //$this->basePath = rtrim($basePath, '/');
+        //$this->basePath = $basePath;
+        //$this->basePath = '/' . ltrim($basePath, '/');
 
-        $methods = null === $methods ? Route::HTTP_METHOD_ANY : $methods;
-        $route   = new Route($path, $middleware, $methods, $name);
-
-        $this->routes[] = $route;
-        $this->router->addRoute($route);
-
-        return $route;
+        $this->basePath = sprintf('/%s', ltrim($basePath, '/'));
     }
 
-
-
-
-
-
-
-
-
-
+    /**
+     * Get the router base path.
+     */
+    public function getBasePath(): string
+    {
+        return $this->basePath;
+    }
 
     /**
-     * Add a route to the map.
+     * Add a route for the router to match.
      *
      * @param string          $path
      * @param RequestHandlerInterface $handler
@@ -128,11 +120,8 @@ class RouteCollector
     // TODO : harmoniser la signature de la méthode avec la classe Route qui contient aussi une méthode statique "map()" mais on peut lui passer un tableau de méthodes en second paramétre.
     public function map(string $path): Route
     {
-        // TODO : attention vérifier si cette modification du path avec un slash n'est pas en doublon avec celle qui est faite dans la classe Route !!!!
-        $path = sprintf('/%s', ltrim($path, '/'));
-
-
-        $route   = Route::any($path);
+        $path = rtrim($this->basePath, '/') . '/' . ltrim($path, '/');
+        $route = new Route($path);
 
         $this->routes[] = $route;
         $this->router->addRoute($route);
@@ -285,8 +274,6 @@ class RouteCollector
         return $this->map($pattern);
     }
 
-
-
     /**
      * Create a redirect from one URI to another.
      *
@@ -345,15 +332,16 @@ class RouteCollector
 
 
     /**
-     * Retrieve all directly registered routes with the application.
+     * Retrieve all directly registered routes inside this collector.
      *
      * @return Route[]
      */
-    // TODO : réfléchir si on garde cette méthode, qui ne semble pas servir à grand chose...
+    // TODO : réfléchir si on garde cette méthode, qui ne semble pas servir à grand chose... Elle devrait plutot se trouver dans le Router car si on passe directement par le router pour ajouter une route sans passer par le collector on ne la trouvera pas dans cette liste, et lorsqu'on va ajouter la notion de group dans le collector on va passer au callback la classe collector donc cette méthode getRoutes va poluer l'objet...
+    /*
     public function getRoutes() : array
     {
         return $this->routes;
-    }
+    }*/
 
     /**
      * Determine if the route is duplicated in the current list.
@@ -364,7 +352,8 @@ class RouteCollector
      *
      * @throws Exception\DuplicateRouteException on duplicate route detection.
      */
-    // TODO : métohde à virer
+    // TODO : méthode à virer
+    /*
     private function checkForDuplicateRoute(string $path, array $methods = null) : void
     {
         if (null === $methods) {
@@ -396,6 +385,6 @@ class RouteCollector
                 $name ? sprintf(', with name "%s"', $name) : ''
             ));
         }
-    }
+    }*/
 
 }

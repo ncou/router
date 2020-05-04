@@ -34,7 +34,12 @@ class RoutingMiddleware implements MiddlewareInterface
     }
 
     /**
-     * Process a server request and return a response.
+     * @param ServerRequestInterface  $request
+     * @param RequestHandlerInterface $handler
+     * @return ResponseInterface
+     *
+     * @throws NotFoundHttpException
+     * @throws MethodNotAllowedHttpException
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
@@ -44,21 +49,28 @@ class RoutingMiddleware implements MiddlewareInterface
         return $handler->handle($request);
     }
 
-    // have a public visibility to allow the class RoutingHandler to perform the Routing if it's not already done (in case the user doesn't add manualy this middleware)
+    /**
+     * Perform routing (use 'public' visibility to be called by the RoutingHandler if needed)
+     *
+     * @param  ServerRequestInterface $request PSR7 Server Request
+     * @return ServerRequestInterface
+     *
+     * @throws NotFoundHttpException
+     * @throws MethodNotAllowedHttpException
+     */
     public function performRouting(ServerRequestInterface $request) : ServerRequestInterface
     {
-        // TODO : il faudrait peut etre récupérer la réponse via un $handle->handle() pour récupérer les headers de la réponse + le charset et version 1.1/1.0 pour le passer dans les exceptions (notfound+methodnotallowed) car on va recréer une nouvelle response !!!! donc si ca se trouve les headers custom genre X-Powered ou CORS vont être perdus lorsqu'on va afficher les message custom pour l'exception 404 par exemple !!!!
+        // TODO : il faudrait peut etre récupérer la réponse via un $handle->handle() pour récupérer les headers de la réponse + le charset et version 1.1/1.0 pour le passer dans les exceptions (notfound+methodnotallowed) car on va recréer une nouvelle response !!!! donc si ca se trouve les headers custom genre X-Powered ou CORS vont être perdus lorsqu'on va afficher les messages custom pour l'exception 404 par exemple !!!!
 
         //$result = $this->getDispatchResult($request);
         $result = $this->router->match($request);
 
+        // Http 405 error => Invalid Method
         if ($result->isMethodFailure()) {
-            // Http error 405 invalid method
             throw new MethodNotAllowedHttpException($result->getAllowedMethods());
         }
-
+        // Http 404 error => Not Found
         if ($result->isFailure()) {
-            // Http error 404 not found
             throw new NotFoundHttpException();
         }
 
@@ -66,7 +78,7 @@ class RoutingMiddleware implements MiddlewareInterface
         // TODO : faire plutot porter ces informations (method et uri utilisé) directement dans l'objet MatchingResult ??????
         //$request = $request->withAttribute('routeInfo', [$request->getMethod(), (string) $request->getUri()]);
 
-        // Store the actual route result in the request attributes.
-        return $request->withAttribute(MatchingResult::class, $result);
+        // Store the actual route result in the request attributes, to be used/executed by the router handler.
+        return $request->withAttribute(MatchingResult::ATTRIBUTE, $result);
     }
 }

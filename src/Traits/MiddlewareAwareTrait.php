@@ -13,7 +13,7 @@ use Psr\Http\Server\MiddlewareInterface;
 trait MiddlewareAwareTrait
 {
     /**
-     * @var \Psr\Http\Server\MiddlewareInterface[]
+     * @var array
      */
     protected $middlewares = [];
 

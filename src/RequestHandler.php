@@ -22,19 +22,14 @@ use Psr\Http\Server\RequestHandlerInterface;
 final class RequestHandler implements RequestHandlerInterface
 {
 
-    /**
-     * The request handler middleware queue
-     *
-     * @var array MiddlewareInterface[]
-     */
-    private $queue = [];
+    /** @var array MiddlewareInterface[] */
+    private $middleware = [];
 
-    /**
-     * The request handler fallback when queue is empty
-     *
-     * @var RequestHandlerInterface
-     */
+    /** @var RequestHandlerInterface */
     private $fallback;
+
+    /** @var int */
+    private $index = 0;
 
     /**
      * Constructor of the class
@@ -45,17 +40,18 @@ final class RequestHandler implements RequestHandlerInterface
     }
 
     /**
-     * @param MiddlewareInterface $middleware Middleware to add at the end of the queue.
+     * @param MiddlewareInterface $middleware Middleware to add at the end of the array.
      */
+    // TODO : renommer la fonction en "addMiddleware()"
     public function pipe(MiddlewareInterface $middleware): self
     {
-        $this->queue[] = $middleware;
+        $this->middleware[] = $middleware;
 
         return $this;
     }
 
     /**
-     * @param MiddlewareInterface $middleware Middleware to add at the end of the queue.
+     * @param RequestHandlerInterface $fallback RequestHandler used if the last middleware doesn't return a response.
      */
     public function setFallback(RequestHandlerInterface $fallback): self
     {
@@ -69,12 +65,24 @@ final class RequestHandler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request) : ResponseInterface
     {
-        $middleware = array_shift($this->queue);
-
-        if (is_null($middleware)) {
-            return $this->fallback->handle($request);
+        if (isset($this->middleware[$this->index])) {
+            //return $this->middleware[$index]->process($request, $this);
+            return $this->middleware[$this->index]->process($request, $this->nextHandler());
         }
 
-        return $middleware->process($request, $this);
+        return $this->fallback->handle($request);
+    }
+
+    /**
+     * Get a handler pointing to the next middleware.
+     *
+     * @return static
+     */
+    private function nextHandler()
+    {
+        $copy = clone $this;
+        $copy->index++;
+
+        return $copy;
     }
 }

@@ -79,7 +79,8 @@ class Route implements MiddlewareAwareInterface
     public function __construct(string $path)
     {
         // A path must start with a slash and must not have multiple slashes at the beginning because it would be confused with a network path, e.g. '//domain.com/path'.
-        $this->path = sprintf('/%s', ltrim($path, '/'));
+        //$this->path = sprintf('/%s', ltrim($path, '/'));
+        $this->path = '/' . ltrim($path, '/');
     }
 
     public static function get(string $path): self
@@ -444,6 +445,8 @@ class Route implements MiddlewareAwareInterface
     public function method(...$methods): self
     {
         //$methods = is_array($methods[0]) ? $methods[0] : $methods;
+
+        // TODO : on pourrait pas simplifier le if en utilisant un exemple comme ca :     $methods = $methods && is_array($methods[0]) ? $methods[0] : $methods;
 
         // Allow passing arrays of methods or individual lists of methods
         if (isset($methods[0])
