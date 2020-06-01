@@ -44,7 +44,7 @@ final class Callback implements TargetInterface
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
         // TODO : à virer c'est pour un test !!!!
-        $this->container->add(ServerRequestInterface::class, $request);
+        $this->container->bind(ServerRequestInterface::class, $request);
 
         // TODO : il faut surement stocker la $request dans un tableau avec la clé = au nom de la classe pour permettre au Invoker de matcher la request avec via un Autowire avec ce paramétre du tableau
         //return (new Invoker($this->container))->call($this->callback, [$request]);
