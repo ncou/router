@@ -16,7 +16,7 @@
     "require": {
         "php": "^7.1",
         "psr/http-server-middleware": "^1.0",
-        "chiron/injector": "^0.1",
+        "chiron/injector": "^0.2",
         "chiron/http-exceptions": "^2.0"
     },
     "require-dev": {
