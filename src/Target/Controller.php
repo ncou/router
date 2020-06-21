@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Chiron\Invoker\Invoker;
+use Chiron\Injector\Injector;
 
 /**
  * Targets to all actions in specific controller. Variation of Action without action constrain.
@@ -51,7 +51,7 @@ final class Controller implements RequestHandlerInterface
             //return $handler->handle($request);
         }*/
 
-        return (new Invoker($this->container))->call([$this->controller, $action], [$request]);
+        return (new Injector($this->container))->call([$this->controller, $action], [$request]);
     }
 
     public function getDefaults(): array

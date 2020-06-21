@@ -10,8 +10,6 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Chiron\Container\ReflectionResolver;
-use Chiron\Invoker\Invoker;
-use Chiron\Invoker\Exception\InvocationException;
 use Chiron\Http\Exception\Client\BadRequestHttpException;
 use InvalidArgumentException;
 

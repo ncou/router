@@ -57,6 +57,8 @@ use Chiron\Container\SingletonInterface;
 // TODO : déplacer cette classe + les deux classes ViewController et RedirectController ainsi que la facade directement dans un répertoire "Routing" qui serait dans le framework Chiron !!!!
 // TODO : utiliser les constantes de la classe Methode (ex : Method::POST / ::TRACE  ...etc)
 // TODO : harmoniser le terme "pattern" versus "path" qui est différent entre les classes Route et RouteCollector. Idem pour la fonction "map()" qui n'a pas la même signature entre les deux classes.
+
+// TODO : attention si on garde l'interface SingletonInterface il faut ajouter une dépendance sur le Container, il faudrait plutot créer une classe ServiceProvider dans ce package qui se chargerai faire un bind singleton pour la classe RouteCollector. Il faudrait surement aussi binder la classe Pipeline avec une instance initialisée avec un setFallback qui pointe sur la classe RoutingHandler
 final class RouteCollector implements SingletonInterface
 {
     /**
@@ -283,6 +285,7 @@ final class RouteCollector implements SingletonInterface
      *
      * @return \Chiron\Routing\Route
      */
+    // TODO : permettre de passer un UriInterface ou une string pour la destination !!!
     public function redirect(string $url, string $destination, int $status = 302): Route
     {
         $controller = $this->target->callback([RedirectController::class, 'redirect']);

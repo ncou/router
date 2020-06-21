@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Chiron\Invoker\Invoker;
+use Chiron\Injector\Injector;
 
 /**
  * Provides ability to invoke from a given controller set:
@@ -58,7 +58,7 @@ final class Group implements RequestHandlerInterface
             //return $handler->handle($request);
         }*/
 
-        return (new Invoker($this->container))->call([$controller, $action], [$request]);
+        return (new Injector($this->container))->call([$controller, $action], [$request]);
     }
 
     public function getDefaults(): array

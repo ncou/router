@@ -10,8 +10,8 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Chiron\Container\ReflectionResolver;
-use Chiron\Invoker\Invoker;
-use Chiron\Invoker\Exception\InvocationException;
+use Chiron\Injector\Injector;
+use Chiron\Injector\Exception\InvocationException;
 use Chiron\Http\Exception\Client\BadRequestHttpException;
 use InvalidArgumentException;
 
@@ -33,6 +33,8 @@ final class Action implements TargetInterface
     private $controller;
     /** @var array|string */
     private $action;
+    /** @var Injector */
+    private $injector;
 
     /**
      * @param ContainerInterface $container
@@ -53,7 +55,7 @@ final class Action implements TargetInterface
         $this->controller = $controller;
         $this->action = $action;
 
-        $this->invoker = new Invoker($this->container);
+        $this->injector = new Injector($this->container);
     }
 
     //https://github.com/PHP-DI/Slim-Bridge/blob/master/src/ControllerInvoker.php#L43
@@ -90,7 +92,7 @@ final class Action implements TargetInterface
 
 
         try {
-            $response = $this->invoker->call([$this->controller, $action], [$request]);
+            $response = $this->injector->call([$this->controller, $action], [$request]);
         } catch (InvocationException $e) {
             // TODO : améliorer le code pour permettre de passer en paramétre l'exception précédente ($e) à cette http exception
             throw new BadRequestHttpException();

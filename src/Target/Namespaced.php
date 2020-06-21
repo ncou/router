@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Chiron\Invoker\Invoker;
+use Chiron\Injector\Injector;
 
 /**
  * Provides ability to invoke any controller from given namespace.
@@ -68,7 +68,7 @@ final class Namespaced implements RequestHandlerInterface
             //return $handler->handle($request);
         }*/
 
-        return (new Invoker($this->container))->call([$class, $action], [$request]);
+        return (new Injector($this->container))->call([$class, $action], [$request]);
     }
 
     public function getDefaults(): array

@@ -9,7 +9,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Chiron\Invoker\Invoker;
+use Chiron\Injector\Injector;
 
 /**
  * Callback wraps arbitrary PHP callback into object matching [[MiddlewareInterface]].
@@ -49,7 +49,7 @@ final class Callback implements TargetInterface
         // TODO : il faut surement stocker la $request dans un tableau avec la clé = au nom de la classe pour permettre au Invoker de matcher la request avec via un Autowire avec ce paramétre du tableau
         //return (new Invoker($this->container))->call($this->callback, [$request]);
         //return (new Invoker($this->container))->call($this->callback, [ServerRequestInterface::class => $request]);
-        return (new Invoker($this->container))->call($this->callback, $request->getAttributes());
+        return (new Injector($this->container))->call($this->callback, $request->getAttributes());
     }
 
     public function getDefaults(): array
