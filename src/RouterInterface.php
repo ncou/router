@@ -6,7 +6,6 @@ namespace Chiron\Router;
 
 use Psr\Http\Message\ServerRequestInterface;
 
-
 interface RouterInterface
 {
 
@@ -29,6 +28,17 @@ interface RouterInterface
      * @return MatchingResult
      */
     public function addRoute(Route $route): Route;
+
+    /**
+     * Get a named route.
+     *
+     * @param string $name Route name
+     *
+     * @throws Exception\RouteNotFoundException If named route does not exist
+     *
+     * @return \Chiron\Router\Route
+     */
+    public function getNamedRoute(string $name): Route;
 
     /**
      * Get route objects.

@@ -58,6 +58,8 @@ use Chiron\Container\SingletonInterface;
 // TODO : utiliser les constantes de la classe Methode (ex : Method::POST / ::TRACE  ...etc)
 // TODO : harmoniser le terme "pattern" versus "path" qui est différent entre les classes Route et RouteCollector. Idem pour la fonction "map()" qui n'a pas la même signature entre les deux classes.
 
+// TODO : créer une méthode globale nommée "base_path(): string" qui se chargerai de retourner la valeur du getBasePath() de cette classe (qu'on irait chercher via le container) ???
+
 // TODO : attention si on garde l'interface SingletonInterface il faut ajouter une dépendance sur le Container, il faudrait plutot créer une classe ServiceProvider dans ce package qui se chargerai faire un bind singleton pour la classe RouteCollector. Il faudrait surement aussi binder la classe Pipeline avec une instance initialisée avec un setFallback qui pointe sur la classe RoutingHandler
 final class RouteCollector implements SingletonInterface
 {
@@ -109,6 +111,30 @@ final class RouteCollector implements SingletonInterface
     public function getBasePath(): string
     {
         return $this->basePath;
+    }
+
+    /**
+     * Get a named route (proxy helper).
+     *
+     * @param string $name Route name
+     *
+     * @throws Exception\RouteNotFoundException If named route does not exist
+     *
+     * @return \Chiron\Router\Route
+     */
+    public function getNamedRoute(string $name): Route
+    {
+        return $this->router->getNamedRoute($name);
+    }
+
+    /**
+     * Get route objects (proxy helper).
+     *
+     * @return Route[]
+     */
+    public function getRoutes(): array
+    {
+        return $this->router->getRoutes();
     }
 
     /**
@@ -277,6 +303,19 @@ final class RouteCollector implements SingletonInterface
     }
 
     /**
+     * Create a permanent redirect from one URI to another.
+     *
+     * @param string $url
+     * @param string $destination
+     *
+     * @return \Chiron\Routing\Route
+     */
+    public function permanentRedirect(string $url, string $destination): Route
+    {
+        return $this->redirect($url, $destination, 301);
+    }
+
+    /**
      * Create a redirect from one URI to another.
      *
      * @param string $url
@@ -294,19 +333,6 @@ final class RouteCollector implements SingletonInterface
                 ->to($controller)
                 ->setDefault('destination', $destination)
                 ->setDefault('status', $status);
-    }
-
-    /**
-     * Create a permanent redirect from one URI to another.
-     *
-     * @param string $url
-     * @param string $destination
-     *
-     * @return \Chiron\Routing\Route
-     */
-    public function permanentRedirect(string $url, string $destination): Route
-    {
-        return $this->redirect($url, $destination, 301);
     }
 
     /**
@@ -328,11 +354,6 @@ final class RouteCollector implements SingletonInterface
                 ->setDefault('template', $template)
                 ->setDefault('parameters', $params);
     }
-
-
-
-
-
 
     /**
      * Retrieve all directly registered routes inside this collector.
